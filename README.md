@@ -29,3 +29,21 @@ El usuario se encuentra en la pantalla de inicio al abrir la aplicación, despu�
 
 
 **Componentes en las pantallas**
+
+
+
+* Botón de inicio
+* Título de la aplicación
+* Descripción de la aplicación
+* Pestaña de opciones
+* Barra de búsqueda
+* Botón de búsqueda
+* Texto: Últimas películas
+* Botón de ver más películas
+* Portadas de películas y su título
+* Texto: Películas favoritas
+* Botón de ver más películas favoritas
+* Texto: Aún no tienes películas favoritas guardadas
+
+
+
