@@ -12,6 +12,7 @@ El usuario se encuentra en la pantalla de inicio al abrir la aplicación, despu�
   
 El usuario se encuentra en la pantalla de inicio al abrir la aplicación, después el usuario selecciona la opción de ver más dentro de la sección de películas favoritas, la aplicación le lleva a la página de películas favoritas donde se encuentran todas las películas que el usuario ha marcado como favoritas al seleccionar el icono de corazón en el banner de cada película dentro de la aplicación. Por último, el usuario selecciona el banner de una película lo que le llevará a los detalles de la misma.
 
+---
 **2. INFORMACIÓN POR PANTALLA**
 
 ======================================================================
@@ -36,6 +37,7 @@ CONSERVA:
 - La disposición general de la pantalla de inicio y la navegación.
 - El historial de "Últimas Películas" disponibles en la base de datos de la app.
 
+---
 ======================================================================
 
 INICIO CON PELÍCULAS FAVORITAS
@@ -63,6 +65,7 @@ CONSERVA:
 - Los datos de las preferencias del usuario, manteniendo visibles las películas que previamente marcó como favoritas en su respectiva sección.
 - Los elementos globales de navegación.
 
+---
 ======================================================================
 
 ÚLTIMAS PELÍCULAS
@@ -88,6 +91,7 @@ CONSERVA:
 - El orden cronológico o de sistema del listado completo de "Últimas Películas".
 - Los elementos persistentes de identidad de la marca (logotipo) y controles de navegación.
 
+---
 ======================================================================
 
 PELÍCULAS FAVORITAS
@@ -114,6 +118,7 @@ CONSERVA:
 - El estado relleno (favorito) de todos los íconos de corazón al cargar la pantalla.
 - La barra de navegación y el formato estándar de las tarjetas.
 
+---
 ======================================================================
 
 COINCIDENCIAS DE BÚSQUEDA
@@ -141,6 +146,7 @@ CONSERVA:
 - El término de búsqueda introducido dentro de la barra de texto.
 - La barra de navegación superior y el diseño estructurado de las tarjetas.
 
+---
 ======================================================================
 
 DETALLES DE PELÍCULA
@@ -305,7 +311,7 @@ La aplicación utilizará `NavigationStack` para organizar el recorrido entre in
 
 Se utilizarán `NavigationLink` para iniciar la navegación desde elementos seleccionables, como los botones “Ver más” y las portadas de las películas. Además, `navigationDestination` relacionará los datos de navegación con sus pantallas de destino.
 
-Los destinos podrán representarse mediante un `enum` con casos para últimas películas, películas favoritas, resultados de búsqueda y detalles de una película. Los casos de búsqueda y detalles incluirán, respectivamente, el texto consultado y el identificador de la película seleccionada. Para utilizar este enum en navegación basada en valores, deberá cumplir el protocolo `Hashable`.
+Los destinos podrán representarse mediante un `enum` con casos para últimas películas, películas favoritas, resultados de búsqueda y detalles de una película. Los casos de búsqueda y detalles incluirán, respectivamente, el texto consultado y el identificador de la película seleccionada. 
 
 ---
 
