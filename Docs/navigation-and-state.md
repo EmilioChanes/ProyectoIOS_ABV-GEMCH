@@ -173,6 +173,7 @@ CONSERVA:
 - Toda la información descriptiva de la película (sinopsis, datos técnicos, actores), manteniéndola estática para su lectura.
 - La navegación principal de la aplicación.
 
+---
 **3. ORGANIZACIÓN DEL ESTADO**
 
 El estado de MovieMap se organizará según las pantallas que necesitan utilizar cada dato y el tiempo durante el cual debe conservarse. Se distinguirá entre estado local, propio de una pantalla, y estado compartido, utilizado por varias pantallas.
