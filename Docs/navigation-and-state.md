@@ -1,7 +1,9 @@
-**INFORMACIÓN POR PANTALLA**
+**2. INFORMACIÓN POR PANTALLA**
 
 ======================================================================
+
 INICIO SIN PELÍCULAS FAVORITAS
+
 ======================================================================
 
 MUESTRA:
@@ -21,7 +23,9 @@ CONSERVA:
 - El historial de "Últimas Películas" disponibles en la base de datos de la app.
 
 ======================================================================
+
 INICIO CON PELÍCULAS FAVORITAS
+
 ======================================================================
 
 MUESTRA:
@@ -33,7 +37,7 @@ MUESTRA:
 
 RECIBE:
 - Ingreso de texto en la barra de búsqueda y clics en el botón "Buscar".
-- Comandos de deslizamiento (scroll horizontal) en las listas de películas.
+- Comandos de deslizamiento (scroll horizontal) en el carrusel de películas.
 - Clics en los botones "Ver más" para expandir las listas.
 - Clics en los íconos de corazón para actualizar preferencias.
 
@@ -46,7 +50,9 @@ CONSERVA:
 - Los elementos globales de navegación.
 
 ======================================================================
+
 ÚLTIMAS PELÍCULAS
+
 ======================================================================
 
 MUESTRA:
@@ -69,7 +75,9 @@ CONSERVA:
 - Los elementos persistentes de identidad de la marca (logotipo) y controles de navegación.
 
 ======================================================================
+
 PELÍCULAS FAVORITAS
+
 ======================================================================
 
 MUESTRA:
@@ -93,7 +101,9 @@ CONSERVA:
 - La barra de navegación y el formato estándar de las tarjetas.
 
 ======================================================================
+
 COINCIDENCIAS DE BÚSQUEDA
+
 ======================================================================
 
 MUESTRA:
@@ -118,7 +128,9 @@ CONSERVA:
 - La barra de navegación superior y el diseño estructurado de las tarjetas.
 
 ======================================================================
+
 DETALLES DE PELÍCULA
+
 ======================================================================
 
 MUESTRA:
