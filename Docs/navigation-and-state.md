@@ -166,3 +166,234 @@ MODIFICA:
 CONSERVA:
 - Toda la información descriptiva de la película (sinopsis, datos técnicos, actores), manteniéndola estática para su lectura.
 - La navegación principal de la aplicación.
+
+**3. ORGANIZACIÓN DEL ESTADO**
+
+El estado de MovieMap se organizará según las pantallas que necesitan utilizar cada dato y el tiempo durante el cual debe conservarse. Se distinguirá entre estado local, propio de una pantalla, y estado compartido, utilizado por varias pantallas.
+
+Se aplicará el principio **Single Source of Truth**, manteniendo una única fuente de verdad para cada dato compartido. Así se evitará que una película aparezca como favorita en una pantalla y como no favorita en otra.
+
+---
+
+**PELÍCULAS MÁS RECIENTES**
+
+DÓNDE VIVIRÁN:
+
+- En un modelo compartido observable (clase), utilizando `@Observable`.
+- La pantalla de inicio y la pantalla de últimas películas consultarán la misma instancia del modelo.
+
+JUSTIFICACIÓN:
+
+- Inicio mostrará una selección de las películas más recientes y la pantalla de últimas películas utilizará el catálogo cargado.
+- Compartir esta información evitará mantener colecciones independientes que puedan mostrar datos distintos.
+
+---
+
+**PELÍCULAS FAVORITAS**
+
+DÓNDE VIVIRÁN:
+
+- En el modelo compartido observable.
+- La colección estará disponible para inicio, últimas películas, coincidencias de búsqueda y detalles.
+
+JUSTIFICACIÓN:
+
+- El usuario podrá agregar o quitar favoritos desde diferentes pantallas.
+- Todas las pantallas deberán reflejar los cambios en la colección y en los íconos de corazón.
+- Las vistas consultarán una misma fuente de verdad para determinar si una película está marcada como favorita.
+
+---
+
+**TEXTO DE BÚSQUEDA**
+
+DÓNDE VIVIRÁ:
+
+- En un estado local con `@State` dentro de la pantalla que contiene el buscador.
+- Si el buscador es un componente separado, podrá editar ese texto mediante `@Binding`.
+
+JUSTIFICACIÓN:
+
+- El texto representa una entrada temporal que el usuario puede modificar antes de buscar.
+- Al ejecutar la búsqueda, se enviará la consulta a la pantalla de coincidencias.
+
+---
+
+**CONSULTA ENVIADA Y RESULTADOS DE BÚSQUEDA**
+
+DÓNDE VIVIRÁN:
+
+- La consulta se recibirá como dato de entrada en la pantalla de coincidencias.
+- Los resultados se mantendrán en el estado de esa pantalla.
+
+JUSTIFICACIÓN:
+
+- La consulta permitirá identificar qué información debe solicitarse a la API y mostrarse en el encabezado.
+- La consulta y sus resultados deberán conservarse al abrir un detalle y regresar, mientras la pantalla de coincidencias permanezca en el recorrido de navegación.
+
+---
+
+**TEXTO PARA BUSCAR EN FAVORITOS**
+
+DÓNDE VIVIRÁ:
+
+- En un estado local con `@State` dentro de la pantalla de películas favoritas.
+
+JUSTIFICACIÓN:
+
+- La búsqueda solo modificará qué películas favoritas se muestran.
+- Filtrar la lista no eliminará películas ni modificará la colección compartida de favoritos.
+
+---
+
+**IDENTIFICADOR DE LA PELÍCULA SELECCIONADA**
+
+DÓNDE VIVIRÁ:
+
+- Se pasará como dato de navegación a la pantalla de detalles.
+
+JUSTIFICACIÓN:
+
+- Permitirá identificar qué película debe mostrarse o consultarse en la API.
+- No será necesario enviar todo el catálogo ni mantener una selección global utilizada por todas las pantallas.
+
+---
+
+**INFORMACIÓN ADICIONAL DEL DETALLE**
+
+DÓNDE VIVIRÁ:
+
+- En el estado de la pantalla de detalles de película.
+
+JUSTIFICACIÓN:
+
+- La sinopsis, el reparto y los demás datos consultados corresponden a la película que se está mostrando.
+- El estado de favorito se consultará en el modelo compartido para mantenerlo coordinado con las otras pantallas.
+
+---
+
+**ESTADO DE CARGA Y ERROR**
+
+DÓNDE VIVIRÁ:
+
+- Junto a los datos de cada consulta.
+- El catálogo mantendrá su estado de carga en el modelo compartido; las búsquedas y los detalles lo mantendrán en sus respectivas pantallas.
+
+JUSTIFICACIÓN:
+
+- Cada consulta puede encontrarse en una situación diferente.
+- La aplicación deberá distinguir entre una operación en curso, una respuesta exitosa y un error.
+- Una búsqueda sin coincidencias se mostrará como un resultado vacío, no como un error de conexión.
+
+---
+
+**ESTADO DEL MENÚ DE NAVEGACIÓN**
+
+DÓNDE VIVIRÁ:
+
+- En un estado local con `@State` en la vista que administra el menú.
+
+JUSTIFICACIÓN:
+
+- Indicar si el menú está abierto o cerrado es un cambio temporal de presentación.
+- Este estado no necesita formar parte del modelo que contiene las películas y los favoritos.
+
+---
+
+**4. ESTRATEGIA DE NAVEGACIÓN**
+
+La aplicación utilizará `NavigationStack` para organizar el recorrido entre inicio, listas, coincidencias y detalles. Este mecanismo permitirá avanzar hacia una pantalla y regresar a la anterior mediante los controles de navegación del sistema.
+
+Se utilizarán `NavigationLink` para iniciar la navegación desde elementos seleccionables, como los botones “Ver más” y las portadas de las películas. Además, `navigationDestination` relacionará los datos de navegación con sus pantallas de destino.
+
+Los destinos podrán representarse mediante un `enum` con casos para últimas películas, películas favoritas, resultados de búsqueda y detalles de una película. Los casos de búsqueda y detalles incluirán, respectivamente, el texto consultado y el identificador de la película seleccionada. Para utilizar este enum en navegación basada en valores, deberá cumplir el protocolo `Hashable`.
+
+---
+
+**FLUJO INICIO → LISTA DE PELÍCULAS → DETALLE**
+
+RECORRIDO:
+
+- Al abrir la aplicación, el usuario encontrará la pantalla de inicio con una selección de películas recientes.
+- Al seleccionar “Ver más” en la sección “Últimas Películas”, accederá a la pantalla del catálogo cargado.
+- Las películas se mostrarán ordenadas de la más reciente a la menos reciente según su fecha de estreno.
+- Al seleccionar la portada o el título de una película, se abrirá su pantalla de detalles.
+
+MECANISMOS:
+
+- `NavigationStack` administrará el recorrido y permitirá regresar.
+- Un `NavigationLink` abrirá la pantalla de últimas películas.
+- Otro `NavigationLink` permitirá seleccionar una película.
+- `navigationDestination` determinará la pantalla correspondiente al destino seleccionado.
+
+INFORMACIÓN QUE SE ENVÍA:
+
+- El identificador de la película seleccionada.
+- La pantalla de detalles utilizará ese ID para mostrar o solicitar la información correspondiente.
+
+AL REGRESAR:
+
+- El usuario volverá a la lista desde la que seleccionó la película.
+- El catálogo cargado seguirá disponible en el modelo compartido.
+- Los cambios realizados en favoritos se reflejarán en los corazones de las tarjetas.
+
+---
+
+**FLUJO INICIO → BÚSQUEDA → RESULTADOS → DETALLE**
+
+RECORRIDO:
+
+- El usuario escribirá el nombre de una película en el buscador.
+- Al pulsar “Buscar”, se comprobará que la consulta no esté vacía ni contenga únicamente espacios.
+- Si la consulta es válida, se abrirá la pantalla de coincidencias y se solicitarán los resultados a la API.
+- La pantalla mostrará el estado de carga, las películas encontradas, un mensaje sin resultados o un error, según corresponda.
+- Al seleccionar una película, se abrirá su pantalla de detalles.
+
+MECANISMOS:
+
+- `@State` mantendrá el texto escrito en el buscador.
+- Si el buscador es un componente separado, `@Binding` permitirá modificar el texto de la vista que lo contiene.
+- El botón “Buscar” iniciará la navegación hacia coincidencias después de validar la consulta.
+- `NavigationStack` y `navigationDestination` organizarán los destinos.
+- Un `NavigationLink` permitirá abrir el detalle desde cada resultado.
+
+INFORMACIÓN QUE SE ENVÍA:
+
+- El texto consultado se enviará a la pantalla de coincidencias.
+- El identificador de la película seleccionada se enviará a la pantalla de detalles.
+
+AL REGRESAR:
+
+- Se conservarán la consulta y los resultados mientras la pantalla de coincidencias permanezca en la pila de navegación.
+- Los cambios en favoritos se mostrarán en las tarjetas correspondientes.
+
+---
+
+**FLUJO INICIO → FAVORITOS → PELÍCULA GUARDADA → DETALLE**
+
+RECORRIDO:
+
+- El usuario seleccionará “Ver más” en la sección “Películas Favoritas”.
+- La aplicación abrirá la pantalla que muestra la colección compartida de favoritos.
+- El usuario podrá buscar dentro de esa colección sin modificar los favoritos originales.
+- Al seleccionar una película guardada, se abrirá su pantalla de detalles.
+- Seleccionar una película guardada será una acción dentro de la lista; no requerirá una pantalla intermedia adicional.
+
+MECANISMOS:
+
+- Un `NavigationLink` abrirá la pantalla de películas favoritas.
+- La pantalla consultará el modelo compartido observable.
+- `@State` mantendrá el texto utilizado para filtrar los favoritos.
+- Un `NavigationLink` permitirá abrir el detalle de la película seleccionada.
+- `navigationDestination` utilizará el mismo destino de detalle disponible desde el catálogo y las coincidencias.
+
+INFORMACIÓN QUE SE ENVÍA:
+
+- El identificador de la película seleccionada.
+- No será necesario enviar una copia de la colección de favoritos, porque las pantallas consultarán el mismo modelo compartido.
+
+AL REGRESAR:
+
+- La lista reflejará cualquier cambio realizado en los favoritos desde el detalle.
+- Si una película fue desmarcada, dejará de aparecer en la colección.
+- Si la colección queda vacía, la interfaz mostrará el mensaje correspondiente.
+- Los favoritos se conservarán en memoria durante el uso de la aplicación; su conservación después de cerrarla requerirá un mecanismo de persistencia.
