@@ -6,86 +6,117 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-    @State var text: String = ""
+    @State private var modelo = ModeloPeliculas() //catálogo de películas
+    @State private var ruta: [Destino] = [] //Guarda el recorrido de navegación
 
     var body: some View {
+        NavigationStack(path: $ruta) {
+            ScrollView {
+                VStack(spacing: 20) {
+                    EncabezadoView(ruta: $ruta)
 
-        
-        VStack{
-            VStack{
-                HStack{
-                    Button{
-                        print("Home")
-                    } label: {
-                        Image(systemName: "house")
-                            .bold()
-                            .padding()
-                            .font(.system(size: 30))
-                            .foregroundStyle(.black)
-                            .background(.white)
-                            .cornerRadius(50)
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Text("Últimas películas")
+                                .font(.title2)
+                                .bold()
+
+                            Spacer()
+
+                            NavigationLink(
+                                "Ver más",
+                                value: Destino.ultimas
+                            )
+                        }
+
+                        ScrollView(.horizontal) {
+                            HStack(alignment: .top, spacing: 16) {
+                                ForEach(
+                                    modelo.peliculas,
+                                    id: \.id
+                                ) { pelicula in
+                                    TarjetaPeliculaView(
+                                        pelicula: pelicula
+                                    )
+                                    .frame(width: 180)
+                                }
+                            }
+                        }
+
+                        HStack {
+                            Text("Películas favoritas")
+                                .font(.title2)
+                                .bold()
+
+                            Spacer()
+
+                            NavigationLink(
+                                "Ver más",
+                                value: Destino.favoritos
+                            )
+                        }
+
+                        if modelo.peliculasFavoritas.isEmpty {
+                            Text(
+                                "Aún no tienes películas favoritas guardadas..."
+                            )
+                            .foregroundStyle(.secondary)
+                        } else {
+                            ScrollView(.horizontal) {
+                                HStack(
+                                    alignment: .top,
+                                    spacing: 16
+                                ) {
+                                    ForEach(
+                                        modelo.peliculasFavoritas,
+                                        id: \.id
+                                    ) { pelicula in
+                                        TarjetaPeliculaView(
+                                            pelicula: pelicula
+                                        )
+                                        .frame(width: 180)
+                                    }
+                                }
+                            }
+                        }
                     }
-                    Spacer()
-                    Button{
-                        print("NavHamburguer")
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                            .bold()
-                            .padding()
-                            .font(.system(size: 30))
-                            .foregroundStyle(.black)
-                            .background(.white)
-                            .cornerRadius(5)
-                    }
-                }
-                
-                Text("MovieMap")
-                    .bold()
-                    .font(.largeTitle)
-                Text("Descripción de la app")
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 35))
-                        .foregroundStyle(.black)
-                        .padding(.all, 5)
-                    
-                    TextField(text: $text) {
-                        Text("Buscar una película...")
-                    }
-                    .bold()
-                    
-                    Button {
-                        print("Si")
-                    } label: {
-                        Text("Buscar")
-                            .bold()
-                            .padding()
-                            .foregroundStyle(.white)
-                            .background(.cyan)
-                            .cornerRadius(10)
-                    }
-                    .cornerRadius(20)
                     .padding()
                 }
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .padding()
             }
-            .background(Color.gray)
-            Spacer()
-            
-            
-        }
-    }
+            .navigationDestination(for: Destino.self) { destino in
+                switch destino {
+                case .ultimas:
+                    SecondView(
+                        destino: destino,
+                        ruta: $ruta
+                    )
 
+                case .favoritos:
+                    SecondView(
+                        destino: destino,
+                        ruta: $ruta
+                    )
+
+                case .resultados:
+                    SecondView(
+                        destino: destino,
+                        ruta: $ruta
+                    )
+
+                case .detalle(let pelicula):
+                    DetallePeliculaView(
+                        pelicula: pelicula,
+                        ruta: $ruta
+                    )
+                }
+            }
+        }
+        .environment(modelo)
+    }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
