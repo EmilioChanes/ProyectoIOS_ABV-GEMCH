@@ -8,64 +8,64 @@
 import SwiftUI
 
 struct SecondView: View {
-    @Environment(ModeloPeliculas.self) private var modelo
+    @Environment(movieServices.self) private var service
 
-    let destino: Destino
+    let destination: Destination
 
-    @Binding var ruta: [Destino]
+    @Binding var path: [Destination]
 
-    @State private var textoFavoritos = ""
-    @State private var consultaFavoritos = ""
+    @State private var favoritesSearchText = ""
+    @State private var favoritesQuery = ""
 
-    private var esPantallaFavoritos: Bool {
-        if case .favoritos = destino {
+    private var isFavoritesScreen: Bool {
+        if case .favorites = destination {
             return true
         }
 
         return false
     }
 
-    private var titulo: String {
-        switch destino {
-        case .ultimas:
+    private var title: String {
+        switch destination {
+        case .latest:
             return "Últimas películas"
 
-        case .favoritos:
+        case .favorites:
             return "Películas favoritas"
 
-        case .resultados(let consulta):
-            return "Coincidencias con \"\(consulta)\""
+        case .results(let query):
+            return "Coincidencias con \"\(query)\""
 
-        case .detalle:
+        case .detail:
             return "Películas"
         }
     }
 
-    private var peliculasVisibles: [Pelicula] {
-        switch destino {
-        case .ultimas:
-            return modelo.peliculas
+    private var visibleMovies: [Movie] {
+        switch destination {
+        case .latest:
+            return service.movies
 
-        case .favoritos:
-            return modelo.buscar(
-                consultaFavoritos,
-                en: modelo.peliculasFavoritas
+        case .favorites:
+            return service.search(
+                favoritesQuery,
+                inList: service.favoriteMovies
             )
 
-        case .resultados(let consulta):
-            return modelo.buscar(
-                consulta,
-                en: modelo.peliculas
+        case .results(let query):
+            return service.search(
+                query,
+                inList: service.movies
             )
 
-        case .detalle:
+        case .detail:
             return []
         }
     }
 
-    private var mensajeVacio: String {
-        if esPantallaFavoritos &&
-            modelo.peliculasFavoritas.isEmpty {
+    private var emptyMessage: String {
+        if isFavoritesScreen &&
+            service.favoriteMovies.isEmpty {
             return "Aún no tienes películas favoritas guardadas."
         }
 
@@ -75,27 +75,27 @@ struct SecondView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                EncabezadoView(
-                    ruta: $ruta,
-                    mostrarBuscador: !esPantallaFavoritos
+                HeaderView(
+                    path: $path,
+                    showSearchBar: !isFavoritesScreen
                 )
 
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(titulo)
+                    Text(title)
                         .font(.title2)
                         .bold()
 
-                    if esPantallaFavoritos {
+                    if isFavoritesScreen {
                         HStack {
                             Image(systemName: "magnifyingglass")
 
                             TextField(
                                 "Buscar en películas favoritas...",
-                                text: $textoFavoritos
+                                text: $favoritesSearchText
                             )
 
                             Button("Buscar") {
-                                consultaFavoritos = textoFavoritos
+                                favoritesQuery = favoritesSearchText
                             }
                         }
                         .padding()
@@ -103,16 +103,16 @@ struct SecondView: View {
                         .cornerRadius(12)
                     }
 
-                    if peliculasVisibles.isEmpty {
-                        Text(mensajeVacio)
+                    if visibleMovies.isEmpty {
+                        Text(emptyMessage)
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(
-                            peliculasVisibles,
+                            visibleMovies,
                             id: \.id
-                        ) { pelicula in
-                            TarjetaPeliculaView(
-                                pelicula: pelicula
+                        ) { movie in
+                            MovieCardView(
+                                movie: movie
                             )
                         }
                     }
@@ -120,6 +120,6 @@ struct SecondView: View {
                 .padding()
             }
         }
-        .navigationTitle(titulo)
+        .navigationTitle(title)
     }
 }

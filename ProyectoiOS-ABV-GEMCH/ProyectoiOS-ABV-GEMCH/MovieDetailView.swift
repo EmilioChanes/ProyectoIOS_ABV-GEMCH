@@ -7,29 +7,29 @@
 
 import SwiftUI
 
-struct DetallePeliculaView: View {
-    let pelicula: Pelicula
+struct MovieDetailView: View {
+    let movie: Movie
 
-    @Binding var ruta: [Destino]
+    @Binding var path: [Destination]
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                EncabezadoView(
-                    ruta: $ruta,
-                    mostrarBuscador: false,
-                    mostrarHero: false
+                HeaderView(
+                    path: $path,
+                    showSearchBar: false,
+                    showHero: false
                 )
 
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        Text(pelicula.titulo)
+                        Text(movie.title)
                             .font(.largeTitle)
                             .bold()
 
                         Spacer()
 
-                        BotonFavoritoView(pelicula: pelicula)
+                        FavoriteButtonView(movie: movie)
                     }
 
                     Image(systemName: "film")
@@ -39,21 +39,21 @@ struct DetallePeliculaView: View {
                         .background(Color.gray.opacity(0.2))
                         .cornerRadius(15)
 
-                    Text("Año de estreno: \(pelicula.anio)")
+                    Text("Año de estreno: \(movie.year)")
 
                     Text(
-                        "Clasificación: \(pelicula.clasificacion)"
+                        "Clasificación: \(movie.classification)"
                     )
 
-                    Text("Categoría: \(pelicula.categoria)")
+                    Text("Categoría: \(movie.category)")
 
-                    Text("Director: \(pelicula.director)")
+                    Text("Director: \(movie.director)")
 
                     Text("Sinopsis")
                         .font(.title2)
                         .bold()
 
-                    Text(pelicula.sinopsis)
+                    Text(movie.synopsis)
 
                     Text("Reparto principal")
                         .font(.title2)
@@ -62,9 +62,9 @@ struct DetallePeliculaView: View {
                     ScrollView(.horizontal) {
                         HStack(alignment: .top, spacing: 16) {
                             ForEach(
-                                pelicula.reparto,
+                                movie.cast,
                                 id: \.self
-                            ) { nombre in
+                            ) { name in
                                 VStack(spacing: 8) {
                                     Image(systemName: "person.fill")
                                         .font(.system(size: 40))
@@ -77,7 +77,7 @@ struct DetallePeliculaView: View {
                                         )
                                         .cornerRadius(12)
 
-                                    Text(nombre)
+                                    Text(name)
                                         .multilineTextAlignment(
                                             .center
                                         )
