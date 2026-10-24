@@ -7,23 +7,23 @@
 
 import SwiftUI
 
-struct EncabezadoView: View {
-    @Binding var ruta: [Destino]
+struct HeaderView: View {
+    @Binding var path: [Destination]
 
-    var mostrarBuscador: Bool = true
-    var mostrarHero: Bool = true
+    var showSearchBar: Bool = true
+    var showHero: Bool = true
 
-    @State private var texto = ""
+    @State private var searchText = ""
 
-    private var consulta: String {
-        texto.trimmingCharacters(in: .whitespacesAndNewlines) //normalización del texto
+    private var query: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     var body: some View {
         VStack(spacing: 12) {
             HStack {
                 Button {
-                    ruta.removeAll()
+                    path.removeAll()
                 } label: {
                     Image(systemName: "house")
                         .font(.title)
@@ -31,7 +31,7 @@ struct EncabezadoView: View {
                         .background(.white)
                         .cornerRadius(20)
                 }
-                .accessibilityLabel("Ir al inicio") //Para accesibilidad
+                .accessibilityLabel("Ir al inicio")
 
                 Spacer()
 
@@ -47,7 +47,7 @@ struct EncabezadoView: View {
                 .accessibilityLabel("Menú")
             }
 
-            if mostrarHero {
+            if showHero {
                 Text("MovieMap")
                     .font(.largeTitle)
                     .bold()
@@ -56,17 +56,17 @@ struct EncabezadoView: View {
                     .multilineTextAlignment(.center)
             }
 
-            if mostrarBuscador {
+            if showSearchBar {
                 HStack {
                     Image(systemName: "magnifyingglass")
 
                     TextField(
                         "Buscar una película...",
-                        text: $texto
+                        text: $searchText
                     )
 
                     NavigationLink(
-                        value: Destino.resultados(consulta)
+                        value: Destination.results(query)
                     ) {
                         Text("Buscar")
                             .bold()
@@ -75,7 +75,7 @@ struct EncabezadoView: View {
                             .background(.blue)
                             .cornerRadius(10)
                     }
-                    .disabled(consulta.isEmpty) //Para evitar que se pueda buscar sin haber escrito nada
+                    .disabled(query.isEmpty)
                 }
                 .padding()
                 .background(.white)
@@ -88,17 +88,17 @@ struct EncabezadoView: View {
     }
 }
 
-struct BotonFavoritoView: View {
-    @Environment(ModeloPeliculas.self) private var modelo
+struct FavoriteButtonView: View {
+    @Environment(movieServices.self) private var service
 
-    let pelicula: Pelicula
+    let movie: Movie
 
     var body: some View {
         Button {
-            modelo.alternarFavorito(pelicula)
+            service.toggleFavorite(movie)
         } label: {
             Image(
-                systemName: modelo.esFavorita(pelicula)
+                systemName: service.isFavorite(movie)
                     ? "heart.fill"
                     : "heart"
             )
@@ -107,20 +107,20 @@ struct BotonFavoritoView: View {
             .padding(8)
         }
         .accessibilityLabel(
-            modelo.esFavorita(pelicula)
-                ? "Quitar \(pelicula.titulo) de favoritos"
-                : "Agregar \(pelicula.titulo) a favoritos"
+            service.isFavorite(movie)
+                ? "Quitar \(movie.title) de favoritos"
+                : "Agregar \(movie.title) a favoritos"
         )
     }
 }
 
-struct TarjetaPeliculaView: View {
-    let pelicula: Pelicula
+struct MovieCardView: View {
+    let movie: Movie
 
     var body: some View {
         VStack(spacing: 8) {
             NavigationLink(
-                value: Destino.detalle(pelicula)
+                value: Destination.detail(movie)
             ) {
                 VStack(spacing: 8) {
                     Image(systemName: "film")
@@ -130,17 +130,17 @@ struct TarjetaPeliculaView: View {
                         .background(Color.gray.opacity(0.2))
                         .cornerRadius(12)
 
-                    Text(pelicula.titulo)
+                    Text(movie.title)
                         .font(.headline)
                         .multilineTextAlignment(.center)
 
-                    Text(pelicula.anio)
+                    Text(movie.year)
                         .font(.subheadline)
                 }
                 .foregroundStyle(.primary)
             }
 
-            BotonFavoritoView(pelicula: pelicula)
+            FavoriteButtonView(movie: movie)
         }
         .padding()
         .frame(maxWidth: .infinity)

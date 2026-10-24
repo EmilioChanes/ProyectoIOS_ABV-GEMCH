@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var modelo = ModeloPeliculas() //catálogo de películas
-    @State private var ruta: [Destino] = [] //Guarda el recorrido de navegación
+    @State private var service = movieServices()
+    @State private var path: [Destination] = []
 
     var body: some View {
-        NavigationStack(path: $ruta) {
+        NavigationStack(path: $path) {
             ScrollView {
                 VStack(spacing: 20) {
-                    EncabezadoView(ruta: $ruta)
+                    HeaderView(path: $path)
 
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
@@ -27,18 +27,18 @@ struct ContentView: View {
 
                             NavigationLink(
                                 "Ver más",
-                                value: Destino.ultimas
+                                value: Destination.latest
                             )
                         }
 
                         ScrollView(.horizontal) {
                             HStack(alignment: .top, spacing: 16) {
                                 ForEach(
-                                    modelo.peliculas,
+                                    service.movies,
                                     id: \.id
-                                ) { pelicula in
-                                    TarjetaPeliculaView(
-                                        pelicula: pelicula
+                                ) { movie in
+                                    MovieCardView(
+                                        movie: movie
                                     )
                                     .frame(width: 180)
                                 }
@@ -54,11 +54,11 @@ struct ContentView: View {
 
                             NavigationLink(
                                 "Ver más",
-                                value: Destino.favoritos
+                                value: Destination.favorites
                             )
                         }
 
-                        if modelo.peliculasFavoritas.isEmpty {
+                        if service.favoriteMovies.isEmpty {
                             Text(
                                 "Aún no tienes películas favoritas guardadas..."
                             )
@@ -70,11 +70,11 @@ struct ContentView: View {
                                     spacing: 16
                                 ) {
                                     ForEach(
-                                        modelo.peliculasFavoritas,
+                                        service.favoriteMovies,
                                         id: \.id
-                                    ) { pelicula in
-                                        TarjetaPeliculaView(
-                                            pelicula: pelicula
+                                    ) { movie in
+                                        MovieCardView(
+                                            movie: movie
                                         )
                                         .frame(width: 180)
                                     }
@@ -85,35 +85,35 @@ struct ContentView: View {
                     .padding()
                 }
             }
-            .navigationDestination(for: Destino.self) { destino in
-                switch destino {
-                case .ultimas:
+            .navigationDestination(for: Destination.self) { destination in
+                switch destination {
+                case .latest:
                     SecondView(
-                        destino: destino,
-                        ruta: $ruta
+                        destination: destination,
+                        path: $path
                     )
 
-                case .favoritos:
+                case .favorites:
                     SecondView(
-                        destino: destino,
-                        ruta: $ruta
+                        destination: destination,
+                        path: $path
                     )
 
-                case .resultados:
+                case .results:
                     SecondView(
-                        destino: destino,
-                        ruta: $ruta
+                        destination: destination,
+                        path: $path
                     )
 
-                case .detalle(let pelicula):
-                    DetallePeliculaView(
-                        pelicula: pelicula,
-                        ruta: $ruta
+                case .detail(let movie):
+                    MovieDetailView(
+                        movie: movie,
+                        path: $path
                     )
                 }
             }
         }
-        .environment(modelo)
+        .environment(service)
     }
 }
 
