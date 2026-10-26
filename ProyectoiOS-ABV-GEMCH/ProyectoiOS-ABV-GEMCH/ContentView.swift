@@ -88,19 +88,19 @@ struct ContentView: View {
             .navigationDestination(for: Destination.self) { destination in
                 switch destination {
                 case .latest:
-                    SecondView(
+                    MovieListView(
                         destination: destination,
                         path: $path
                     )
 
                 case .favorites:
-                    SecondView(
+                    MovieListView(
                         destination: destination,
                         path: $path
                     )
 
                 case .results:
-                    SecondView(
+                    MovieListView(
                         destination: destination,
                         path: $path
                     )

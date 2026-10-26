@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SecondView: View {
+struct MovieListView: View {
     @Environment(movieServices.self) private var service
 
     let destination: Destination
