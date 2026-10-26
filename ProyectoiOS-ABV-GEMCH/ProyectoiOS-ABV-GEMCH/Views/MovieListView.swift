@@ -8,68 +8,25 @@
 import SwiftUI
 
 struct MovieListView: View {
-    @Environment(movieServices.self) private var service
-
-    let destination: Destination
+    @State private var viewModel: MovieListViewModel
 
     @Binding var path: [Destination]
 
     @State private var favoritesSearchText = ""
-    @State private var favoritesQuery = ""
 
-    private var isFavoritesScreen: Bool {
-        if case .favorites = destination {
-            return true
-        }
-
-        return false
-    }
-
-    private var title: String {
-        switch destination {
-        case .latest:
-            return "Últimas películas"
-
-        case .favorites:
-            return "Películas favoritas"
-
-        case .results(let query):
-            return "Coincidencias con \"\(query)\""
-
-        case .detail:
-            return "Películas"
-        }
-    }
-
-    private var visibleMovies: [Movie] {
-        switch destination {
-        case .latest:
-            return service.movies
-
-        case .favorites:
-            return service.search(
-                favoritesQuery,
-                inList: service.favoriteMovies
+    init(
+        destination: Destination,
+        service: movieServices,
+        path: Binding<[Destination]>
+    ) {
+        _viewModel = State(
+            initialValue: MovieListViewModel(
+                destination: destination,
+                service: service
             )
+        )
 
-        case .results(let query):
-            return service.search(
-                query,
-                inList: service.movies
-            )
-
-        case .detail:
-            return []
-        }
-    }
-
-    private var emptyMessage: String {
-        if isFavoritesScreen &&
-            service.favoriteMovies.isEmpty {
-            return "Aún no tienes películas favoritas guardadas."
-        }
-
-        return "No se encontraron películas que coincidan."
+        _path = path
     }
 
     var body: some View {
@@ -77,15 +34,15 @@ struct MovieListView: View {
             VStack(spacing: 20) {
                 HeaderView(
                     path: $path,
-                    showSearchBar: !isFavoritesScreen
+                    showSearchBar: !viewModel.isFavoritesScreen
                 )
 
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(title)
+                    Text(viewModel.title)
                         .font(.title2)
                         .bold()
 
-                    if isFavoritesScreen {
+                    if viewModel.isFavoritesScreen {
                         HStack {
                             Image(systemName: "magnifyingglass")
 
@@ -95,7 +52,9 @@ struct MovieListView: View {
                             )
 
                             Button("Buscar") {
-                                favoritesQuery = favoritesSearchText
+                                viewModel.applyFavoritesSearch(
+                                    favoritesSearchText
+                                )
                             }
                         }
                         .padding()
@@ -103,23 +62,21 @@ struct MovieListView: View {
                         .cornerRadius(12)
                     }
 
-                    if visibleMovies.isEmpty {
-                        Text(emptyMessage)
+                    if viewModel.visibleMovies.isEmpty {
+                        Text(viewModel.emptyMessage)
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(
-                            visibleMovies,
+                            viewModel.visibleMovies,
                             id: \.id
                         ) { movie in
-                            MovieCardView(
-                                movie: movie
-                            )
+                            MovieCardView(movie: movie)
                         }
                     }
                 }
                 .padding()
             }
         }
-        .navigationTitle(title)
+        .navigationTitle(viewModel.title)
     }
 }

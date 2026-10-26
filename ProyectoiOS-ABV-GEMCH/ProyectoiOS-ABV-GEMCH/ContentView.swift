@@ -16,21 +16,21 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     HeaderView(path: $path)
-
+                    
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
                             Text("Últimas películas")
                                 .font(.title2)
                                 .bold()
-
+                            
                             Spacer()
-
+                            
                             NavigationLink(
                                 "Ver más",
                                 value: Destination.latest
                             )
                         }
-
+                        
                         ScrollView(.horizontal) {
                             HStack(alignment: .top, spacing: 16) {
                                 ForEach(
@@ -44,20 +44,20 @@ struct ContentView: View {
                                 }
                             }
                         }
-
+                        
                         HStack {
                             Text("Películas favoritas")
                                 .font(.title2)
                                 .bold()
-
+                            
                             Spacer()
-
+                            
                             NavigationLink(
                                 "Ver más",
                                 value: Destination.favorites
                             )
                         }
-
+                        
                         if service.favoriteMovies.isEmpty {
                             Text(
                                 "Aún no tienes películas favoritas guardadas..."
@@ -90,21 +90,24 @@ struct ContentView: View {
                 case .latest:
                     MovieListView(
                         destination: destination,
+                        service: service,
                         path: $path
                     )
-
+                    
                 case .favorites:
                     MovieListView(
                         destination: destination,
+                        service: service,
                         path: $path
                     )
-
+                    
                 case .results:
                     MovieListView(
                         destination: destination,
+                        service: service,
                         path: $path
                     )
-
+                    
                 case .detail(let movie):
                     MovieDetailView(
                         movie: movie,
