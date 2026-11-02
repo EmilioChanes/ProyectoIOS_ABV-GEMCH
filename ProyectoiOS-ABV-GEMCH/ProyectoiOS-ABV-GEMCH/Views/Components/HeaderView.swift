@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct HeaderView: View {
+    @Environment(movieServices.self) private var service
+
     @Binding var path: [Destination]
 
     var showSearchBar: Bool = true
@@ -80,6 +82,12 @@ struct HeaderView: View {
                 .padding()
                 .background(.white)
                 .cornerRadius(15)
+            }
+            if let errorMessage = service.errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
             }
         }
         .padding()

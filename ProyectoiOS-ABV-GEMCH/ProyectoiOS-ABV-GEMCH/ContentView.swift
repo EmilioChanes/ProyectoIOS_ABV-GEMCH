@@ -6,10 +6,17 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    @State private var service = movieServices()
+    @State private var service: movieServices
     @State private var path: [Destination] = []
+
+    init(context: ModelContext) {
+        _service = State(
+            initialValue: movieServices(context: context)
+        )
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -121,5 +128,21 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    let schema = Schema([
+        SavedMovie.self
+    ])
+
+    let configuration = ModelConfiguration(
+        schema: schema,
+        isStoredInMemoryOnly: true
+    )
+
+    let container = try! ModelContainer(
+        for: schema,
+        configurations: [configuration]
+    )
+
+    let context = ModelContext(container)
+
+    ContentView(context: context)
 }
