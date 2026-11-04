@@ -20,7 +20,7 @@ struct Movie: Hashable {
 
 extension Movie {
     static var mockMovieHorizon = Movie(
-        id: 1,
+        id: -1,
         title: "Horizonte",
         year: "2026",
         classification: "B",
@@ -34,7 +34,7 @@ extension Movie {
     )
 
     static var mockMovieJourney = Movie(
-        id: 2,
+        id: -2,
         title: "El último viaje",
         year: "2025",
         classification: "A",
@@ -48,7 +48,7 @@ extension Movie {
     )
 
     static var mockMovieOpportunity = Movie(
-        id: 3,
+        id: -3,
         title: "Una nueva oportunidad",
         year: "2024",
         classification: "B",
