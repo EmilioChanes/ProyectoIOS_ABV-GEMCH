@@ -7,16 +7,16 @@
 import SwiftUI
 
 struct FavoriteButtonView: View {
-    @Environment(movieServices.self) private var service
+    @Environment(MovieViewModel.self) private var movieViewModel
 
     let movie: Movie
 
     var body: some View {
         Button {
-            service.toggleFavorite(movie)
+            movieViewModel.toggleFavorite(movie)
         } label: {
             Image(
-                systemName: service.isFavorite(movie)
+                systemName: movieViewModel.isFavorite(movie)
                     ? "heart.fill"
                     : "heart"
             )
@@ -25,7 +25,7 @@ struct FavoriteButtonView: View {
             .padding(8)
         }
         .accessibilityLabel(
-            service.isFavorite(movie)
+            movieViewModel.isFavorite(movie)
                 ? "Quitar \(movie.title) de favoritos"
                 : "Agregar \(movie.title) a favoritos"
         )

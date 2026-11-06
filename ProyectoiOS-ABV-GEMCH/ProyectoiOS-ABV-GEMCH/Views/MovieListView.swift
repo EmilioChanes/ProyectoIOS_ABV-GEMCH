@@ -16,13 +16,13 @@ struct MovieListView: View {
 
     init(
         destination: Destination,
-        service: movieServices,
+        movieViewModel: MovieViewModel,
         path: Binding<[Destination]>
     ) {
         _viewModel = State(
             initialValue: MovieListViewModel(
                 destination: destination,
-                service: service
+                movieViewModel: movieViewModel
             )
         )
 
@@ -62,15 +62,29 @@ struct MovieListView: View {
                         .cornerRadius(12)
                     }
 
-                    if viewModel.visibleMovies.isEmpty {
-                        Text(viewModel.emptyMessage)
-                            .foregroundStyle(.secondary)
+                    if viewModel.isFavoritesScreen {
+                        if viewModel.visibleFavorites.isEmpty {
+                            Text(viewModel.emptyMessage)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            ForEach(
+                                viewModel.visibleFavorites,
+                                id: \.id
+                            ) { favorite in
+                                MovieFavoriteCardView(favorite: favorite)
+                            }
+                        }
                     } else {
-                        ForEach(
-                            viewModel.visibleMovies,
-                            id: \.id
-                        ) { movie in
-                            MovieCardView(movie: movie)
+                        if viewModel.visibleMovies.isEmpty {
+                            Text(viewModel.emptyMessage)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            ForEach(
+                                viewModel.visibleMovies,
+                                id: \.id
+                            ) { movie in
+                                MovieCardView(movie: movie)
+                            }
                         }
                     }
                 }

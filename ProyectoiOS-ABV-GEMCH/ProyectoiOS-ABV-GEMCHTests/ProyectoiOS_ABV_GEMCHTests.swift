@@ -9,8 +9,9 @@ import Testing
 import SwiftData
 @testable import ProyectoiOS_ABV_GEMCH
 
+// Crea un servicio con almacenamiento independiente en memoria.
 @MainActor
-private func makeTestService() throws -> movieServices {
+private func makeTestService() throws -> MovieService {
     let schema = Schema([
         SavedMovie.self
     ])
@@ -27,34 +28,45 @@ private func makeTestService() throws -> movieServices {
 
     let context = ModelContext(container)
 
-    return movieServices(context: context)
+    return MovieService(context: context)
+}
+
+// Crea el ViewModel compartido utilizando el servicio de prueba.
+@MainActor
+private func makeTestViewModel() throws -> MovieViewModel {
+    let service = try makeTestService()
+
+    return MovieViewModel(service: service)
 }
 
 @MainActor
-struct MovieServicesTests {
+struct MovieViewModelTests {
 
     @Test(
         "Verifica que toggleFavorite agrega y elimina películas correctamente de favoritos"
     )
     func testToggleFavorite() throws {
-        let service = try makeTestService()
+        let viewModel = try makeTestViewModel()
         let movie = Movie.mockMovieHorizon
 
-        #expect(service.isFavorite(movie) == false)
-        #expect(service.favoriteMovies.isEmpty)
+        #expect(viewModel.errorMessage == nil)
+        #expect(viewModel.isFavorite(movie) == false)
+        #expect(viewModel.favoriteMovies.isEmpty)
 
-        service.toggleFavorite(movie)
+        viewModel.toggleFavorite(movie)
 
-        #expect(service.errorMessage == nil)
-        #expect(service.isFavorite(movie) == true)
-        #expect(service.favoriteMovies.count == 1)
-        #expect(service.favoriteMovies.first == movie)
+        #expect(viewModel.errorMessage == nil)
+        #expect(viewModel.isFavorite(movie) == true)
+        #expect(viewModel.favoriteMovies.count == 1)
+        #expect(viewModel.favoriteMovies.first?.id == movie.id)
+        #expect(viewModel.favoriteMovies.first?.title == movie.title)
+        #expect(viewModel.favoriteMovies.first?.year == movie.year)
 
-        service.toggleFavorite(movie)
+        viewModel.toggleFavorite(movie)
 
-        #expect(service.errorMessage == nil)
-        #expect(service.isFavorite(movie) == false)
-        #expect(service.favoriteMovies.isEmpty)
+        #expect(viewModel.errorMessage == nil)
+        #expect(viewModel.isFavorite(movie) == false)
+        #expect(viewModel.favoriteMovies.isEmpty)
     }
 
     @Test(
@@ -71,11 +83,11 @@ struct MovieServicesTests {
         query: String,
         expectedCount: Int
     ) throws {
-        let service = try makeTestService()
+        let viewModel = try makeTestViewModel()
 
-        let results = service.search(
+        let results = viewModel.search(
             query,
-            inList: service.movies
+            inList: viewModel.movies
         )
 
         #expect(results.count == expectedCount)
@@ -87,25 +99,25 @@ struct MovieListViewModelTests {
 
     @Test("El título se adapta correctamente al Destination")
     func testTitlesForDestinations() throws {
-        let service = try makeTestService()
+        let movieViewModel = try makeTestViewModel()
 
         let latestVM = MovieListViewModel(
             destination: .latest,
-            service: service
+            movieViewModel: movieViewModel
         )
 
         #expect(latestVM.title == "Últimas películas")
 
         let favoritesVM = MovieListViewModel(
             destination: .favorites,
-            service: service
+            movieViewModel: movieViewModel
         )
 
         #expect(favoritesVM.title == "Películas favoritas")
 
         let resultsVM = MovieListViewModel(
             destination: .results("Batman"),
-            service: service
+            movieViewModel: movieViewModel
         )
 
         #expect(
@@ -114,7 +126,7 @@ struct MovieListViewModelTests {
 
         let detailVM = MovieListViewModel(
             destination: .detail(Movie.mockMovieHorizon),
-            service: service
+            movieViewModel: movieViewModel
         )
 
         #expect(detailVM.title == "Películas")
@@ -124,18 +136,18 @@ struct MovieListViewModelTests {
         "Identifica correctamente si la pantalla actual es la de favoritos"
     )
     func testIsFavoritesScreen() throws {
-        let service = try makeTestService()
+        let movieViewModel = try makeTestViewModel()
 
         let favoritesVM = MovieListViewModel(
             destination: .favorites,
-            service: service
+            movieViewModel: movieViewModel
         )
 
         #expect(favoritesVM.isFavoritesScreen == true)
 
         let latestVM = MovieListViewModel(
             destination: .latest,
-            service: service
+            movieViewModel: movieViewModel
         )
 
         #expect(latestVM.isFavoritesScreen == false)
@@ -145,37 +157,39 @@ struct MovieListViewModelTests {
         "La búsqueda dentro de la vista de favoritos filtra la lista visible"
     )
     func testApplyFavoritesSearch() throws {
-        let service = try makeTestService()
+        let movieViewModel = try makeTestViewModel()
         let movie1 = Movie.mockMovieHorizon
         let movie2 = Movie.mockMovieJourney
 
-        service.toggleFavorite(movie1)
-        service.toggleFavorite(movie2)
+        movieViewModel.toggleFavorite(movie1)
+        movieViewModel.toggleFavorite(movie2)
 
-        #expect(service.errorMessage == nil)
+        #expect(movieViewModel.errorMessage == nil)
 
         let viewModel = MovieListViewModel(
             destination: .favorites,
-            service: service
+            movieViewModel: movieViewModel
         )
 
-        #expect(viewModel.visibleMovies.count == 2)
+        #expect(viewModel.visibleFavorites.count == 2)
 
         viewModel.applyFavoritesSearch("viaje")
 
-        #expect(viewModel.visibleMovies.count == 1)
-        #expect(viewModel.visibleMovies.first == movie2)
+        #expect(viewModel.visibleFavorites.count == 1)
+        #expect(viewModel.visibleFavorites.first?.id == movie2.id)
     }
 
     @Test(
         "Muestra el mensaje de 'lista vacía' adecuado según el contexto"
     )
     func testEmptyMessages() throws {
-        let service = try makeTestService()
+        let movieViewModel = try makeTestViewModel()
+
+        #expect(movieViewModel.errorMessage == nil)
 
         let favoritesVM = MovieListViewModel(
             destination: .favorites,
-            service: service
+            movieViewModel: movieViewModel
         )
 
         #expect(
@@ -185,7 +199,7 @@ struct MovieListViewModelTests {
 
         let resultsVM = MovieListViewModel(
             destination: .results("dsfhjsdf"),
-            service: service
+            movieViewModel: movieViewModel
         )
 
         #expect(
