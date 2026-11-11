@@ -9,12 +9,14 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @State private var service: movieServices
+    @State private var movieViewModel: MovieViewModel
     @State private var path: [Destination] = []
 
     init(context: ModelContext) {
-        _service = State(
-            initialValue: movieServices(context: context)
+        let service = MovieService(context: context)
+
+        _movieViewModel = State(
+            initialValue: MovieViewModel(service: service)
         )
     }
 
@@ -41,7 +43,7 @@ struct ContentView: View {
                         ScrollView(.horizontal) {
                             HStack(alignment: .top, spacing: 16) {
                                 ForEach(
-                                    service.movies,
+                                    movieViewModel.movies,
                                     id: \.id
                                 ) { movie in
                                     MovieCardView(
@@ -65,7 +67,7 @@ struct ContentView: View {
                             )
                         }
                         
-                        if service.favoriteMovies.isEmpty {
+                        if movieViewModel.favoriteMovies.isEmpty {
                             Text(
                                 "Aún no tienes películas favoritas guardadas..."
                             )
@@ -77,11 +79,11 @@ struct ContentView: View {
                                     spacing: 16
                                 ) {
                                     ForEach(
-                                        service.favoriteMovies,
+                                        movieViewModel.favoriteMovies,
                                         id: \.id
-                                    ) { movie in
-                                        MovieCardView(
-                                            movie: movie
+                                    ) { favorite in
+                                        MovieFavoriteCardView(
+                                            favorite: favorite
                                         )
                                         .frame(width: 180)
                                     }
@@ -97,21 +99,21 @@ struct ContentView: View {
                 case .latest:
                     MovieListView(
                         destination: destination,
-                        service: service,
+                        movieViewModel: movieViewModel,
                         path: $path
                     )
                     
                 case .favorites:
                     MovieListView(
                         destination: destination,
-                        service: service,
+                        movieViewModel: movieViewModel,
                         path: $path
                     )
                     
                 case .results:
                     MovieListView(
                         destination: destination,
-                        service: service,
+                        movieViewModel: movieViewModel,
                         path: $path
                     )
                     
@@ -120,10 +122,41 @@ struct ContentView: View {
                         movie: movie,
                         path: $path
                     )
+                case .favoriteDetail(let favorite):
+                    if let movie = movieViewModel.movie(withID: favorite.id) {
+                        MovieDetailView(
+                            movie: movie,
+                            path: $path
+                        )
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 20) {
+                                HeaderView(
+                                    path: $path,
+                                    showSearchBar: false,
+                                    showHero: false
+                                )
+
+                                VStack(alignment: .leading, spacing: 16) {
+                                    Text(favorite.title)
+                                        .font(.largeTitle)
+                                        .bold()
+
+                                    Text("Año de estreno: \(favorite.year)")
+
+                                    Text(
+                                        "Los detalles de esta película no están disponibles."
+                                    )
+                                    .foregroundStyle(.secondary)
+                                }
+                                .padding()
+                            }
+                        }
+                    }
                 }
             }
         }
-        .environment(service)
+        .environment(movieViewModel)
     }
 }
 

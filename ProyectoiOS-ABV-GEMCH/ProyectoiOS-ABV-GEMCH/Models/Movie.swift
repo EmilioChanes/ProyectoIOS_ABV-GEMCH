@@ -16,6 +16,7 @@ struct Movie: Hashable {
     let director: String
     let synopsis: String
     let cast: [String]
+    let rating: Double?
 }
 
 extension Movie {
@@ -30,7 +31,8 @@ extension Movie {
         Una tripulación recibe una señal desconocida y decide
         investigar su origen.
         """,
-        cast: ["Intérprete A", "Intérprete B"]
+        cast: ["Intérprete A", "Intérprete B"],
+        rating: 8.2
     )
 
     static var mockMovieJourney = Movie(
@@ -44,7 +46,8 @@ extension Movie {
         Dos amigos emprenden un viaje que cambia su manera
         de entender el mundo.
         """,
-        cast: ["Intérprete C", "Intérprete D"]
+        cast: ["Intérprete C", "Intérprete D"],
+        rating: 7.5
     )
 
     static var mockMovieOpportunity = Movie(
@@ -58,7 +61,8 @@ extension Movie {
         Una persona regresa a su ciudad para resolver asuntos
         pendientes y comenzar una nueva etapa.
         """,
-        cast: ["Intérprete E", "Intérprete F"]
+        cast: ["Intérprete E", "Intérprete F"],
+        rating: 7.8
     )
 }
 
@@ -67,4 +71,5 @@ enum Destination: Hashable {
     case favorites
     case results(String)
     case detail(Movie)
+    case favoriteDetail(MovieFavorite)
 }

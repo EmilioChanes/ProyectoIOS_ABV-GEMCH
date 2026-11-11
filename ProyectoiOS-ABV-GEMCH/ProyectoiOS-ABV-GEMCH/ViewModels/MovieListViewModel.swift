@@ -11,15 +11,15 @@ import Observation
 class MovieListViewModel {
     let destination: Destination
 
-    private let service: movieServices
+    private let movieViewModel: MovieViewModel
     private var favoritesQuery = ""
 
     init(
         destination: Destination,
-        service: movieServices
+        movieViewModel: MovieViewModel
     ) {
         self.destination = destination
-        self.service = service
+        self.movieViewModel = movieViewModel
     }
 
     var isFavoritesScreen: Bool {
@@ -41,7 +41,7 @@ class MovieListViewModel {
         case .results(let query):
             return "Coincidencias con \"\(query)\""
 
-        case .detail:
+        case .detail, .favoriteDetail:
             return "Películas"
         }
     }
@@ -49,28 +49,26 @@ class MovieListViewModel {
     var visibleMovies: [Movie] {
         switch destination {
         case .latest:
-            return service.movies
-
-        case .favorites:
-            return service.search(
-                favoritesQuery,
-                inList: service.favoriteMovies
-            )
+            return movieViewModel.movies
 
         case .results(let query):
-            return service.search(
+            return movieViewModel.search(
                 query,
-                inList: service.movies
+                inList: movieViewModel.movies
             )
 
-        case .detail:
+        case .favorites, .detail, .favoriteDetail:
             return []
         }
     }
 
+    var visibleFavorites: [MovieFavorite] {
+        movieViewModel.searchFavorites(favoritesQuery)
+    }
+
     var emptyMessage: String {
         if isFavoritesScreen &&
-            service.favoriteMovies.isEmpty {
+            movieViewModel.favoriteMovies.isEmpty {
             return "Aún no tienes películas favoritas guardadas."
         }
 

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HeaderView: View {
-    @Environment(movieServices.self) private var service
+    @Environment(MovieViewModel.self) private var movieViewModel
 
     @Binding var path: [Destination]
 
@@ -83,7 +83,7 @@ struct HeaderView: View {
                 .background(.white)
                 .cornerRadius(15)
             }
-            if let errorMessage = service.errorMessage {
+            if let errorMessage = movieViewModel.errorMessage {
                 Text(errorMessage)
                     .font(.footnote)
                     .foregroundStyle(.red)
