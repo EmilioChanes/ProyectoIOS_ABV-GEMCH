@@ -1,4 +1,4 @@
-# ProyectoIOS_ABV-GEMCH
+# MovieMap
 Proyecto para la materia: DESARROLLO DE APLICACIONES PARA DISPOSITIVOS IOS - Grupo: 1796 - Sem 27-1
 
 **Integrantes**
@@ -11,9 +11,7 @@ Equipo 6
 
 * Opción A - Aplicación de películas con TMDB
 
-**Wireframes y Explicación de los flujos**
-
-* Wireframes: https://drive.google.com/drive/folders/1h9AyFufJTdQ5cQ-UKAWV9QS7HThZ5U2E?usp=sharing
+**Explicación de los flujos**
 
 * Inicio → lista de películas → detalle
 
@@ -28,7 +26,7 @@ El usuario se encuentra en la pantalla de inicio al abrir la aplicación, despu�
 El usuario se encuentra en la pantalla de inicio al abrir la aplicación, después el usuario selecciona la opción de ver más dentro de la sección de películas favoritas, la aplicación le lleva a la página de películas favoritas donde se encuentran todas las películas que el usuario ha marcado como favoritas al seleccionar el icono de corazón en el banner de cada película dentro de la aplicación. Por último, el usuario selecciona el banner de una película lo que le llevará a los detalles de la misma
 
 
-**Componentes en las pantallas**
+**Wireframes y Componentes en las pantallas**
 
 Inicio sin películas favoritas
 
@@ -37,8 +35,7 @@ Inicio sin películas favoritas
 
 * Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
-* Texto de descripción de la aplicación (Text to speech)
-* Botón nav hamburguer 
+* Texto de descripción de la aplicación (Text to speech) 
 * Barra de búsqueda
 * Texto: Buscar una película... (Text to speech)
 * Botón de búsqueda (Text to speech)
@@ -56,7 +53,6 @@ Inicio con películas favoritas
 * Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
 * Texto de descripción de la aplicación (Text to speech)
-* Botón nav hamburguer
 * Barra de búsqueda
 * Texto: Buscar una película... (Text to speech)
 * Botón de búsqueda (Text to speech)
@@ -74,7 +70,6 @@ Inicio con películas favoritas
 * Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
 * Texto de descripción de la aplicación (Text to speech)
-* Botón nav hamburguer
 * Barra de búsqueda
 * Texto: Buscar una película... (Text to speech)
 * Botón de búsqueda (Text to speech)
@@ -88,7 +83,6 @@ Películas favoritas
 * Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
 * Texto de descripción de la aplicación (Text to speech)
-* Botón nav hamburguer
 * Barra de búsqueda
 * Texto: Buscar en películas favoritas...  (Text to speech)
 * Botón de búsqueda (Text to speech)
@@ -102,7 +96,6 @@ Coincidencias de búsqueda
 * Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
 * Texto de descripción de la aplicación (Text to speech)
-* Botón nav hamburguer
 * Barra de búsqueda 
 * Texto introducido para generar una búsqueda (Text to speech)  
 * Botón de búsqueda (Text to speech)
@@ -114,7 +107,6 @@ Detalles de película
 <img width="402" height="874" alt="image" src="https://github.com/user-attachments/assets/c20c32b5-11a5-4fd9-8fe4-1bc06a2312bc" />
 
 * Botón de inicio (Text to speech)
-* Botón nav hamburguer
 * Botón para añadir/quitar de favoritos (Text to speech)
 * Título de la película (Text to speech)
 * Portada de la película 
@@ -127,5 +119,7 @@ Detalles de película
 * Texto de sinopsis de la película (Text to speech)
 * Texto: Reparto principal (Text to speech)
 * Carrusel de imágenes de miembros del reparto principal junto con su nombre (Text to speech)
+
+**Paso a paso para usar la app**
 
 
