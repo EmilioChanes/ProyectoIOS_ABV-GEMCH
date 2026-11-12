@@ -30,10 +30,8 @@ El usuario se encuentra en la pantalla de inicio al abrir la aplicación, despu�
 
 Inicio sin películas favoritas
 
-<img width="402" height="874" alt="image" src="https://github.com/user-attachments/assets/53adf11e-5246-48f7-8877-8b93e454b8c5" />
+<img width="30%%" height="30%" alt="01_Inicio_Sin_Favoritas" src="https://github.com/user-attachments/assets/1dfe48cb-b125-4f7c-95fa-74a0350683d0" />
 
-
-* Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
 * Texto de descripción de la aplicación (Text to speech) 
 * Barra de búsqueda
@@ -41,16 +39,15 @@ Inicio sin películas favoritas
 * Botón de búsqueda (Text to speech)
 * Texto: Últimas películas (Text to speech)
 * Botón de ver más películas (Text to speech)
-* Carrusel de ortadas de películas y su título con su botón para añadir/quitar de favoritos (Text to speech)
+* Carrusel de portadas de películas y su título con su botón para añadir/quitar de favoritos (Text to speech)
 * Texto: Películas favoritas (Text to speech)
 * Botón de ver más películas favoritas (Text to speech)
 * Texto: Aún no tienes películas favoritas guardadas... (Text to speech)
 
 Inicio con películas favoritas
 
-<img width="402" height="874" alt="image" src="https://github.com/user-attachments/assets/89898565-6193-4e16-860f-c29d919dffcb" />
+<img width="30%" height="30%" alt="02_Inicio_Con_Favoritas" src="https://github.com/user-attachments/assets/91ea58e6-1070-441a-8de1-7f8e0b9ae366" />
 
-* Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
 * Texto de descripción de la aplicación (Text to speech)
 * Barra de búsqueda
@@ -65,7 +62,7 @@ Inicio con películas favoritas
 
 Últimas películas
 
-<img width="402" height="874" alt="image" src="https://github.com/user-attachments/assets/dcef3ef3-c725-4bed-a259-9e1a644fbacd" />
+<img width="30%" height="30%" alt="03_Ultimas_Peliculas" src="https://github.com/user-attachments/assets/274d3d12-e079-49c6-9120-11da44e08fb0" />
 
 * Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
@@ -78,7 +75,7 @@ Inicio con películas favoritas
 
 Películas favoritas
 
-<img width="402" height="874" alt="image" src="https://github.com/user-attachments/assets/b144bb62-dad9-4e19-a613-3616d14b16f6" />
+<img width="30%" height="30%" alt="04_Mis_Favoritas" src="https://github.com/user-attachments/assets/865f6ec0-89f7-46e2-b2b3-8857c1c9a561" />
 
 * Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
@@ -91,7 +88,7 @@ Películas favoritas
 
 Coincidencias de búsqueda
 
-<img width="402" height="874" alt="image" src="https://github.com/user-attachments/assets/783b2226-364c-4c04-a743-ec7432008d74" />
+<img width="30%" height="30%" alt="05_Coincidencias_De_Busqueda" src="https://github.com/user-attachments/assets/0fde873d-a12a-4aef-ac74-a25f8cf358b8" />
 
 * Botón de inicio (Text to speech)
 * Texto de título de la aplicación (Text to speech)
@@ -104,7 +101,7 @@ Coincidencias de búsqueda
 
 Detalles de película
 
-<img width="402" height="874" alt="image" src="https://github.com/user-attachments/assets/c20c32b5-11a5-4fd9-8fe4-1bc06a2312bc" />
+<img width="30%" height="30%" alt="06_Detalles_De_Pelicula" src="https://github.com/user-attachments/assets/30964b97-e38d-4040-b4a1-ad4847a5514b" />
 
 * Botón de inicio (Text to speech)
 * Botón para añadir/quitar de favoritos (Text to speech)
@@ -113,12 +110,13 @@ Detalles de película
 * Texto de fecha de publicación de la película (Text to speech)
 * Texto de clasificación de la película (Text to speech)
 * Texto de categoría(s) de la película (Text to speech)
+* Texto de duración de la película
 * Botones de calificación
 * Texto de director(es) de la película (Text to speech)
 * Texto: Sinopsis (Text to speech)
 * Texto de sinopsis de la película (Text to speech)
 * Texto: Reparto principal (Text to speech)
-* Carrusel de imágenes de miembros del reparto principal junto con su nombre (Text to speech)
+* Carrusel de imágenes de miembros del reparto principal junto con su nombre y rol dentro de la película (Text to speech)
 
 **Paso a paso para usar la app**
 
