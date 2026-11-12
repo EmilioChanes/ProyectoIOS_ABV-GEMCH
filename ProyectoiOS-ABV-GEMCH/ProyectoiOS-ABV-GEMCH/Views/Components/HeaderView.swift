@@ -14,6 +14,7 @@ struct HeaderView: View {
 
     var showSearchBar: Bool = true
     var showHero: Bool = true
+    var showHomeButton: Bool = true
 
     @State private var searchText = ""
 
@@ -23,30 +24,21 @@ struct HeaderView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            HStack {
-                Button {
-                    path.removeAll()
-                } label: {
-                    Image(systemName: "house")
-                        .font(.title)
-                        .padding()
-                        .background(.white)
-                        .cornerRadius(20)
-                }
-                .accessibilityLabel("Ir al inicio")
+            if showHomeButton {
+                HStack {
+                    Button {
+                        path.removeAll()
+                    } label: {
+                        Image(systemName: "house")
+                            .font(.title)
+                            .padding()
+                            .background(.white)
+                            .cornerRadius(20)
+                    }
+                    .accessibilityLabel("Ir al inicio")
 
-                Spacer()
-
-                Button {
-                    print("NavHamburguer")
-                } label: {
-                    Image(systemName: "line.3.horizontal")
-                        .font(.title)
-                        .padding()
-                        .background(.white)
-                        .cornerRadius(10)
+                    Spacer()
                 }
-                .accessibilityLabel("Menú")
             }
 
             if showHero {
@@ -83,6 +75,7 @@ struct HeaderView: View {
                 .background(.white)
                 .cornerRadius(15)
             }
+
             if let errorMessage = movieViewModel.errorMessage {
                 Text(errorMessage)
                     .font(.footnote)
@@ -91,8 +84,8 @@ struct HeaderView: View {
             }
         }
         .padding()
+        .frame(maxWidth: .infinity)
         .foregroundStyle(.black)
         .background(Color.gray.opacity(0.2))
     }
 }
-

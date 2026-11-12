@@ -60,9 +60,7 @@ struct MovieListView: View {
                         .padding()
                         .background(Color.gray.opacity(0.1))
                         .cornerRadius(12)
-                    }
 
-                    if viewModel.isFavoritesScreen {
                         if viewModel.visibleFavorites.isEmpty {
                             Text(viewModel.emptyMessage)
                                 .foregroundStyle(.secondary)
@@ -71,11 +69,20 @@ struct MovieListView: View {
                                 viewModel.visibleFavorites,
                                 id: \.id
                             ) { favorite in
-                                MovieFavoriteCardView(favorite: favorite)
+                                MovieFavoriteCardView(
+                                    favorite: favorite
+                                )
                             }
                         }
                     } else {
-                        if viewModel.visibleMovies.isEmpty {
+                        if viewModel.isLoading {
+                            Text("Cargando películas...")
+                                .foregroundStyle(.secondary)
+                        } else if let errorMessage =
+                            viewModel.loadingErrorMessage {
+                            Text(errorMessage)
+                                .foregroundStyle(.red)
+                        } else if viewModel.visibleMovies.isEmpty {
                             Text(viewModel.emptyMessage)
                                 .foregroundStyle(.secondary)
                         } else {
@@ -91,6 +98,8 @@ struct MovieListView: View {
                 .padding()
             }
         }
-        .navigationTitle(viewModel.title)
+        .task {
+            await viewModel.loadMovies()
+        }
     }
 }

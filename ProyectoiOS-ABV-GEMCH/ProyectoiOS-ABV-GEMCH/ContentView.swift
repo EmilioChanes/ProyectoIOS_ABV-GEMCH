@@ -24,7 +24,10 @@ struct ContentView: View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(spacing: 20) {
-                    HeaderView(path: $path)
+                HeaderView(
+                    path: $path,
+                    showHomeButton: false
+                )
                     
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
