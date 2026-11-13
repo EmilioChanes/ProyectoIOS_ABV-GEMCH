@@ -9,21 +9,17 @@ import SwiftUI
 
 struct MovieFavoriteCardView: View {
     @Environment(MovieViewModel.self) private var movieViewModel
-
     let favorite: MovieFavorite
 
     var body: some View {
         VStack(spacing: 8) {
-            NavigationLink(
-                value: Destination.favoriteDetail(favorite)
-            ) {
+            NavigationLink(value: Destination.favoriteDetail(favorite)) {
                 VStack(spacing: 8) {
-                    Image(systemName: "film")
-                        .font(.system(size: 50))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 140)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(12)
+                    MoviePosterView(
+                        movieID: favorite.id,
+                        posterPath: favorite.posterPath
+                    )
+                    .frame(maxWidth: 200)
 
                     Text(favorite.title)
                         .font(.headline)
@@ -43,9 +39,7 @@ struct MovieFavoriteCardView: View {
                     .foregroundStyle(.red)
                     .padding(8)
             }
-            .accessibilityLabel(
-                "Quitar \(favorite.title) de favoritos"
-            )
+            .accessibilityLabel("Quitar \(favorite.title) de favoritos")
         }
         .padding()
         .frame(maxWidth: .infinity)

@@ -9,4 +9,5 @@ struct MovieFavorite: Hashable {
     let id: Int
     let title: String
     let year: String
+    var posterPath: String? = nil
 }

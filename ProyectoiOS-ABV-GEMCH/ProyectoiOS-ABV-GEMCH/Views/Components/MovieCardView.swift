@@ -12,16 +12,10 @@ struct MovieCardView: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            NavigationLink(
-                value: Destination.detail(movie)
-            ) {
+            NavigationLink(value: Destination.detail(movie)) {
                 VStack(spacing: 8) {
-                    Image(systemName: "film")
-                        .font(.system(size: 50))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 140)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(12)
+                    MoviePosterView(movieID: movie.id, posterPath: movie.posterPath)
+                        .frame(maxWidth: 200)
 
                     Text(movie.title)
                         .font(.headline)
@@ -41,4 +35,3 @@ struct MovieCardView: View {
         .cornerRadius(15)
     }
 }
-

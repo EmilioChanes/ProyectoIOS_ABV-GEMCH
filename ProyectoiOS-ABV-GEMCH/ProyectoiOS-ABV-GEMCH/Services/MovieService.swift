@@ -15,61 +15,58 @@ class MovieService {
     }
 
     func fetchFavorites() throws -> [MovieFavorite] {
-        let savedMovies = try context.fetch(
-            FetchDescriptor<SavedMovie>()
-        )
+        let savedMovies = try context.fetch(FetchDescriptor<SavedMovie>())
 
-        return savedMovies.map { savedMovie in
+        return savedMovies.map {
             MovieFavorite(
-                id: savedMovie.id,
-                title: savedMovie.title,
-                year: savedMovie.year
+                id: $0.id,
+                title: $0.title,
+                year: $0.year,
+                posterPath: $0.posterPath
             )
         }
     }
 
     func addFavorite(_ movie: Movie) throws {
-        let savedMovies = try context.fetch(
-            FetchDescriptor<SavedMovie>()
-        )
+        let savedMovies = try context.fetch(FetchDescriptor<SavedMovie>())
 
-        let alreadySaved = savedMovies.contains { savedMovie in
-            savedMovie.id == movie.id
-        }
-
-        guard !alreadySaved else {
+        guard !savedMovies.contains(where: { $0.id == movie.id }) else {
             return
         }
 
-        let savedMovie = SavedMovie(
-            id: movie.id,
-            title: movie.title,
-            year: movie.year
+        context.insert(
+            SavedMovie(
+                id: movie.id,
+                title: movie.title,
+                year: movie.year,
+                posterPath: movie.posterPath
+            )
         )
-
-        context.insert(savedMovie)
-
-        do {
-            try context.save()
-        } catch {
-            context.rollback()
-            throw error
-        }
+        try saveChanges()
     }
 
     func removeFavorite(id: Int) throws {
-        let savedMovies = try context.fetch(
-            FetchDescriptor<SavedMovie>()
-        )
+        let savedMovies = try context.fetch(FetchDescriptor<SavedMovie>())
 
-        let matchingMovies = savedMovies.filter { savedMovie in
-            savedMovie.id == id
-        }
-
-        for savedMovie in matchingMovies {
+        for savedMovie in savedMovies where savedMovie.id == id {
             context.delete(savedMovie)
         }
 
+        try saveChanges()
+    }
+
+    func updateFavoritePoster(id: Int, posterPath: String) throws {
+        let savedMovies = try context.fetch(FetchDescriptor<SavedMovie>())
+
+        guard let savedMovie = savedMovies.first(where: { $0.id == id }) else {
+            return
+        }
+
+        savedMovie.posterPath = posterPath
+        try saveChanges()
+    }
+
+    private func saveChanges() throws {
         do {
             try context.save()
         } catch {

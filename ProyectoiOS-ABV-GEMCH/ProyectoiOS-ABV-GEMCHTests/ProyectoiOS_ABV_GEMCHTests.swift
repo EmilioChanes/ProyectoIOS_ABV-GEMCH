@@ -87,7 +87,11 @@ struct MovieViewModelTests {
 
         let results = viewModel.search(
             query,
-            inList: viewModel.movies
+            inList: [
+                Movie.mockMovieHorizon,
+                Movie.mockMovieJourney,
+                Movie.mockMovieOpportunity
+            ]
         )
 
         #expect(results.count == expectedCount)
