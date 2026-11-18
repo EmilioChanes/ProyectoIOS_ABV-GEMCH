@@ -14,14 +14,20 @@ struct ContentView: View {
 
     init(context: ModelContext) {
         let service = MovieService(context: context)
-        _movieViewModel = State(initialValue: MovieViewModel(service: service))
+
+        _movieViewModel = State(
+            initialValue: MovieViewModel(service: service)
+        )
     }
 
     var body: some View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(spacing: 20) {
-                    HeaderView(path: $path, showHomeButton: false)
+                    HeaderView(
+                        path: $path,
+                        showHomeButton: false
+                    )
 
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
@@ -31,23 +37,37 @@ struct ContentView: View {
 
                             Spacer()
 
-                            NavigationLink("Ver más", value: Destination.latest)
+                            NavigationLink(
+                                "Ver más",
+                                value: Destination.latest
+                            )
                         }
 
                         if movieViewModel.isLoadingMovies {
                             ProgressView("Cargando películas...")
-                        } else if let message = movieViewModel.moviesErrorMessage {
-                            Text(message)
+                        } else if let errorMessage =
+                            movieViewModel.moviesErrorMessage {
+                            Text(errorMessage)
                                 .foregroundStyle(.red)
                         } else if movieViewModel.movies.isEmpty {
                             Text("No hay películas disponibles.")
                                 .foregroundStyle(.secondary)
                         } else {
                             ScrollView(.horizontal) {
-                                HStack(alignment: .top, spacing: 16) {
-                                    ForEach(movieViewModel.movies.prefix(20), id: \.id) { movie in
+                                HStack(
+                                    alignment: .top,
+                                    spacing: MovieCardMetrics.columnSpacing
+                                ) {
+                                    ForEach(
+                                        movieViewModel.movies.prefix(20),
+                                        id: \.id
+                                    ) { movie in
                                         MovieCardView(movie: movie)
-                                            .frame(width: 180)
+                                            .containerRelativeFrame(
+                                                .horizontal,
+                                                count: 2,
+                                                spacing: MovieCardMetrics.columnSpacing
+                                            )
                                     }
                                 }
                             }
@@ -60,21 +80,35 @@ struct ContentView: View {
 
                             Spacer()
 
-                            NavigationLink("Ver más", value: Destination.favorites)
+                            NavigationLink(
+                                "Ver más",
+                                value: Destination.favorites
+                            )
                         }
 
                         if movieViewModel.favoriteMovies.isEmpty {
-                            Text("Aún no tienes películas favoritas guardadas...")
-                                .foregroundStyle(.secondary)
+                            Text(
+                                "Aún no tienes películas favoritas guardadas..."
+                            )
+                            .foregroundStyle(.secondary)
                         } else {
                             ScrollView(.horizontal) {
-                                HStack(alignment: .top, spacing: 16) {
+                                HStack(
+                                    alignment: .top,
+                                    spacing: MovieCardMetrics.columnSpacing
+                                ) {
                                     ForEach(
                                         movieViewModel.favoriteMovies.prefix(20),
                                         id: \.id
                                     ) { favorite in
-                                        MovieFavoriteCardView(favorite: favorite)
-                                            .frame(width: 180)
+                                        MovieFavoriteCardView(
+                                            favorite: favorite
+                                        )
+                                        .containerRelativeFrame(
+                                            .horizontal,
+                                            count: 2,
+                                            spacing: MovieCardMetrics.columnSpacing
+                                        )
                                     }
                                 }
                             }
@@ -83,7 +117,9 @@ struct ContentView: View {
                     .padding()
                 }
             }
-            .navigationDestination(for: Destination.self) { destination in
+            .navigationDestination(
+                for: Destination.self
+            ) { destination in
                 switch destination {
                 case .latest, .favorites, .results:
                     MovieListView(
@@ -120,15 +156,21 @@ struct ContentView: View {
 }
 
 #Preview {
-    let schema = Schema([SavedMovie.self])
+    let schema = Schema([
+        SavedMovie.self
+    ])
+
     let configuration = ModelConfiguration(
         schema: schema,
         isStoredInMemoryOnly: true
     )
+
     let container = try! ModelContainer(
         for: schema,
         configurations: [configuration]
     )
 
-    ContentView(context: ModelContext(container))
+    let context = ModelContext(container)
+
+    ContentView(context: context)
 }

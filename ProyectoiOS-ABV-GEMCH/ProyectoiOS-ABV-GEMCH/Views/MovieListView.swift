@@ -13,8 +13,8 @@ struct MovieListView: View {
     @Binding var path: [Destination]
 
     private let columns = [
-        GridItem(.flexible(), spacing: 12, alignment: .top),
-        GridItem(.flexible(), spacing: 12, alignment: .top)
+        GridItem(.flexible(), spacing: MovieCardMetrics.columnSpacing, alignment: .top),
+        GridItem(.flexible(), spacing: MovieCardMetrics.columnSpacing, alignment: .top)
     ]
 
     init(
