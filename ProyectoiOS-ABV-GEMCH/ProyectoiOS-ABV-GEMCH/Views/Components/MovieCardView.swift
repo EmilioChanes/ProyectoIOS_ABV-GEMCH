@@ -11,34 +11,13 @@ struct MovieCardView: View {
     let movie: Movie
 
     var body: some View {
-        VStack(spacing: 8) {
-            NavigationLink(
-                value: Destination.detail(movie)
-            ) {
-                VStack(spacing: 8) {
-                    Image(systemName: "film")
-                        .font(.system(size: 50))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 140)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(12)
-
-                    Text(movie.title)
-                        .font(.headline)
-                        .multilineTextAlignment(.center)
-
-                    Text(movie.year)
-                        .font(.subheadline)
-                }
-                .foregroundStyle(.primary)
-            }
-
-            FavoriteButtonView(movie: movie)
-        }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(15)
+        MovieCardLayout(
+            movieID: movie.id,
+            title: movie.title,
+            year: movie.year,
+            posterPath: movie.posterPath,
+            destination: .detail(movie),
+            favoriteControl: FavoriteButtonView(movie: movie)
+        )
     }
 }
-

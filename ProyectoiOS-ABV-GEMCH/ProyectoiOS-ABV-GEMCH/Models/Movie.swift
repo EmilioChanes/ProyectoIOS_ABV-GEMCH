@@ -17,6 +17,7 @@ struct Movie: Hashable {
     let synopsis: String
     let cast: [String]
     let rating: Double?
+    var posterPath: String? = nil
 }
 
 extension Movie {
