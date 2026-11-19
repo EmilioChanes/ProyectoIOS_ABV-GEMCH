@@ -1,0 +1,261 @@
+MOVIEMAP
+Flujos, llamadas y endpoints para la integración con TMDB
+
+ALCANCE
+
+Este documento describe la integración prevista de la API con las funciones que ya se han trabajado: inicio, últimas películas, búsqueda, favoritos y detalle. La aplicación todavía utiliza películas de prueba; las llamadas remotas descritas aquí son el siguiente paso, no funciones ya implementadas.
+
+Se conservan MVVM y la persistencia local de favoritos con SwiftData. No se añaden cuentas, sincronización de favoritos con TMDB, recomendaciones, reseñas, reproducción de videos ni envío de calificaciones. La calificación será información de consulta.
+
+1. FLUJOS QUE SE VAN A SEGUIR
+
+1.1. Inicio → lista de películas → detalle
+
+1) Al abrir la app, se recuperan los favoritos guardados en SwiftData.
+2) Se consulta TMDB para obtener una página de películas recientes.
+3) Inicio muestra una selección de esa colección.
+4) Al pulsar "Ver más", se abre la lista con las películas cargadas. No es necesario repetir la solicitud si ya tenemos esos datos.
+5) Al seleccionar una película, se utiliza su ID para consultar su detalle, créditos y clasificaciones por territorio.
+6) La pantalla muestra la información disponible.
+7) Al regresar, se conserva la colección cargada mientras su estado siga vivo.
+
+"Últimas películas" se interpretará como películas ya estrenadas, ordenadas de la más reciente a la menos reciente. Esta es la interpretación propuesta para el flujo ya definido.
+
+El catálogo remoto está paginado. Para esta integración inicial se solicita page=1, sin añadir controles de paginación ni carga infinita. Por ello, "Ver más" muestra la colección cargada, no todas las películas existentes en TMDB.
+
+1.2. Inicio → búsqueda → resultados → detalle
+
+1) El usuario escribe el título en el buscador.
+2) Al pulsar "Buscar", se eliminan los espacios y saltos de línea de los extremos.
+3) Si la consulta queda vacía, no se envía una solicitud.
+4) Se navega a resultados con el texto consultado.
+5) Se solicita a TMDB la primera página de coincidencias.
+6) El ViewModel conserva los resultados o el error de la consulta.
+7) Al seleccionar un resultado, se consulta el detalle por el ID de esa película.
+8) Al regresar, se conservan la consulta y sus resultados mientras la pantalla siga en la navegación.
+
+La búsqueda general deja de filtrar únicamente las películas de prueba: consulta el catálogo remoto.
+
+1.3. Inicio → favoritos → película guardada → detalle
+
+1) Inicio y la pantalla de favoritos muestran la colección recuperada de SwiftData.
+2) Cada MovieFavorite contiene únicamente id, title y year.
+3) El buscador de favoritos filtra esta colección local. No consulta TMDB.
+4) Al seleccionar un favorito, se utiliza su ID para solicitar los detalles remotos.
+5) La película no necesita aparecer en la página del catálogo cargada para poder consultar su detalle.
+6) Si la consulta falla, el favorito permanece guardado; se mantienen disponibles sus datos locales y se muestra el error correspondiente.
+
+Seleccionar una película guardada abre el detalle; no se añade una pantalla intermedia al flujo.
+
+1.4. Agregar o quitar un favorito
+
+1) El usuario pulsa el corazón en una película.
+2) La vista comunica la acción al MovieViewModel.
+3) El ViewModel llama al MovieService.
+4) El servicio consulta SwiftData y guarda o elimina el registro según corresponda.
+5) Antes de agregar, se comprueba el ID para evitar duplicados.
+6) Después de una operación exitosa, el ViewModel vuelve a recuperar la colección.
+7) Las vistas que observan esa misma instancia reflejan el cambio.
+
+Este flujo es local. No envía POST, PUT ni DELETE a TMDB.
+
+2. LLAMADAS QUE SE HARÁN
+
+2.1. Llamadas locales existentes
+
+MovieService.fetchFavorites()
+- Lee SavedMovie en SwiftData.
+- Devuelve [MovieFavorite].
+- Lanza un error si falla la consulta.
+
+MovieService.addFavorite(movie)
+- Comprueba si el ID ya está guardado.
+- Guarda id, title y year si no existe.
+- Lanza un error si falla la operación.
+
+MovieService.removeFavorite(id:)
+- Localiza el registro por su ID y lo elimina.
+- Lanza un error si falla la operación.
+
+MovieViewModel.searchFavorites(text)
+- Filtra los favoritos en memoria por título.
+- No realiza una solicitud de red ni modifica los registros persistidos.
+
+2.2. Llamadas remotas previstas
+
+Al cargar el catálogo:
+- Una solicitud GET a /discover/movie para la primera página.
+
+Al ejecutar una búsqueda general:
+- Una solicitud GET a /search/movie por consulta válida.
+- Escribir en el campo, por sí solo, no dispara solicitudes.
+
+Al abrir un detalle desde el catálogo, resultados o favoritos:
+- Una solicitud GET a /movie/{movie_id}.
+- Una solicitud GET a /movie/{movie_id}/credits.
+- Una solicitud GET a /movie/{movie_id}/release_dates.
+- Se consideran tres solicitudes separadas para mantener explícito el flujo.
+- No se descargan los detalles de todas las películas al cargar una lista.
+
+Al mostrar imágenes:
+- Se descargan las imágenes correspondientes a las rutas recibidas.
+- Son solicitudes adicionales a las de datos JSON.
+
+Al regresar a una lista ya cargada:
+- Se reutiliza el estado conservado; navegar hacia atrás no requiere por sí mismo una nueva petición.
+
+3. URL BASE Y ENDPOINTS
+
+URL base de datos:
+https://api.themoviedb.org/3
+
+Método de las consultas: GET.
+
+Encabezados:
+Authorization: Bearer <TOKEN_DE_LECTURA>
+Accept: application/json
+
+El token se configura para autenticar la aplicación. Este documento no incluye credenciales.
+
+3.1. Últimas películas
+
+Endpoint:
+/discover/movie
+
+Parámetros previstos:
+- language=es-MX
+- page=1
+- include_adult=false
+- sort_by=primary_release_date.desc
+- primary_release_date.lte=<FECHA_ACTUAL_EN_FORMATO_YYYY-MM-DD>
+
+La fecha límite excluye estrenos posteriores al día de la consulta. El criterio usa la fecha de estreno principal; no implica que sean estrenos exclusivamente en México.
+
+No se utilizará /movie/popular para esta sección porque ordena por popularidad y no por fecha.
+
+3.2. Búsqueda de películas
+
+Endpoint:
+/search/movie
+
+Parámetros previstos:
+- query=<TEXTO_BUSCADO>
+- language=es-MX
+- page=1
+- include_adult=false
+
+Ejemplo:
+https://api.themoviedb.org/3/search/movie?query=Batman&language=es-MX&page=1&include_adult=false
+
+Los parámetros se construirán con URLComponents y URLQueryItem, técnicas presentes en el ejemplo de clase.
+
+3.3. Detalle de una película
+
+Endpoint:
+/movie/{movie_id}
+
+Parámetro:
+- language=es-MX
+
+Se utilizará para obtener información como título, fecha de estreno, sinopsis, géneros, ruta de portada y calificación promedio. El ID debe ser el identificador real de TMDB.
+
+La calificación numérica del modelo, rating, se relacionará con vote_average. Consultar esta información no implica permitir al usuario votar.
+
+Los IDs negativos de las películas de prueba son locales y no se enviarán a este endpoint.
+
+3.4. Reparto y dirección
+
+Endpoint:
+/movie/{movie_id}/credits
+
+Parámetro:
+- language=es-MX
+
+El reparto se obtiene de cast. La dirección se obtiene de crew, seleccionando las personas cuyo trabajo sea Director. Ambos pertenecen al detalle ya previsto.
+
+3.5. Clasificación por edad
+
+Endpoint:
+/movie/{movie_id}/release_dates
+
+Permite recuperar fechas y certificaciones por territorio. Para la clasificación se revisarán las entradas correspondientes a MX y los valores disponibles de certification.
+
+Puede haber varios registros o no existir una clasificación disponible. No se inventará una clasificación ni se interpretará la calificación numérica como clasificación por edad.
+
+3.6. Imágenes de portada y reparto
+
+Base habitual de imágenes:
+https://image.tmdb.org/t/p/
+
+La URL se forma con un tamaño y la ruta devuelta por TMDB. Por ejemplo:
+https://image.tmdb.org/t/p/w500<RUTA_DE_POSTER_PATH>
+
+Se utilizarán poster_path para portadas y profile_path para fotografías del reparto. Si no existe una ruta, podrá mantenerse el icono de reemplazo que ya tiene la interfaz.
+
+Estas descargas complementan los endpoints anteriores; no requieren añadir una galería ni consultar /movie/{movie_id}/images.
+
+4. DISTRIBUCIÓN DE RESPONSABILIDADES
+
+Vistas:
+- Muestran las películas y los favoritos.
+- Reciben acciones de navegación, búsqueda y corazones.
+- Se comunican con los ViewModels; no realizan solicitudes directamente.
+
+MovieViewModel y ViewModels de pantalla:
+- Coordinan las operaciones.
+- Conservan el estado observable necesario: colecciones, carga y errores.
+- Mantienen una única instancia compartida para los favoritos.
+- Distinguen una consulta sin resultados de una consulta fallida.
+
+Servicio remoto de TMDB, por incorporar:
+- Construye la URL y el URLRequest.
+- Utiliza URLSession y async/await.
+- Valida la respuesta HTTP.
+- Convierte el JSON mediante Decodable y JSONDecoder.
+- Devuelve los datos o lanza el error.
+- No conserva listas observables ni mensajes de interfaz.
+
+MovieService actual:
+- Conserva su responsabilidad de acceso a SwiftData.
+- Devuelve favoritos o errores al ViewModel.
+- No es observable.
+
+Modelos:
+- Movie representa los datos de una película para la aplicación.
+- MovieFavorite representa id, title y year para mostrar la colección personal.
+- SavedMovie conserva esos tres datos en SwiftData.
+- Los modelos Decodable representarán las respuestas de TMDB y se adaptarán a los datos que necesitan las vistas.
+
+5. RELACIÓN ENTRE DATOS REMOTOS Y FAVORITOS
+
+TMDB proporciona el catálogo y los detalles.
+SwiftData conserva la colección personal.
+El ID estable de TMDB relaciona ambas fuentes.
+
+No se guardará todo el catálogo en SwiftData. Se mantendrá el almacenamiento local ya definido: id, title y year de cada favorito.
+
+El idioma solicitado no garantiza que todos los textos o metadatos estén disponibles en español. Los campos ausentes y los errores de conexión deben manejarse sin eliminar favoritos.
+
+6. DOCUMENTACIÓN OFICIAL DE REFERENCIA
+
+Catálogo y filtros:
+https://developer.themoviedb.org/reference/discover-movie
+
+Búsqueda:
+https://developer.themoviedb.org/reference/search-movie
+
+Detalle:
+https://developer.themoviedb.org/reference/movie-details
+
+Créditos:
+https://developer.themoviedb.org/reference/movie-credits
+
+Clasificaciones y fechas:
+https://developer.themoviedb.org/reference/movie-release-dates
+
+Imágenes:
+https://developer.themoviedb.org/docs/image-basics
+
+Autenticación:
+https://developer.themoviedb.org/docs/authentication-application
+

@@ -10,23 +10,33 @@ import SwiftData
 
 @main
 struct ProyectoiOS_ABV_GEMCHApp: App {
-    var sharedModelContainer: ModelContainer = {
+    let context: ModelContext = {
         let schema = Schema([
-            Item.self,
+            SavedMovie.self
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+        let configuration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false
+        )
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let container = try ModelContainer(
+                for: schema,
+                configurations: [configuration]
+            )
+
+            return ModelContext(container)
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            fatalError(
+                "Could not create ModelContainer: \(error)"
+            )
         }
     }()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(context: context)
         }
-        .modelContainer(sharedModelContainer)
     }
 }

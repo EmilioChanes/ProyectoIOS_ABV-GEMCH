@@ -6,16 +6,28 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    @State private var service = movieServices()
+    @State private var movieViewModel: MovieViewModel
     @State private var path: [Destination] = []
+
+    init(context: ModelContext) {
+        let service = MovieService(context: context)
+
+        _movieViewModel = State(
+            initialValue: MovieViewModel(service: service)
+        )
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(spacing: 20) {
-                    HeaderView(path: $path)
+                    HeaderView(
+                        path: $path,
+                        showHomeButton: false
+                    )
 
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
@@ -31,16 +43,32 @@ struct ContentView: View {
                             )
                         }
 
-                        ScrollView(.horizontal) {
-                            HStack(alignment: .top, spacing: 16) {
-                                ForEach(
-                                    service.movies,
-                                    id: \.id
-                                ) { movie in
-                                    MovieCardView(
-                                        movie: movie
-                                    )
-                                    .frame(width: 180)
+                        if movieViewModel.isLoadingMovies {
+                            ProgressView("Cargando películas...")
+                        } else if let errorMessage =
+                            movieViewModel.moviesErrorMessage {
+                            Text(errorMessage)
+                                .foregroundStyle(.red)
+                        } else if movieViewModel.movies.isEmpty {
+                            Text("No hay películas disponibles.")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            ScrollView(.horizontal) {
+                                HStack(
+                                    alignment: .top,
+                                    spacing: MovieCardMetrics.columnSpacing
+                                ) {
+                                    ForEach(
+                                        movieViewModel.movies.prefix(20),
+                                        id: \.id
+                                    ) { movie in
+                                        MovieCardView(movie: movie)
+                                            .containerRelativeFrame(
+                                                .horizontal,
+                                                count: 2,
+                                                spacing: MovieCardMetrics.columnSpacing
+                                            )
+                                    }
                                 }
                             }
                         }
@@ -58,7 +86,7 @@ struct ContentView: View {
                             )
                         }
 
-                        if service.favoriteMovies.isEmpty {
+                        if movieViewModel.favoriteMovies.isEmpty {
                             Text(
                                 "Aún no tienes películas favoritas guardadas..."
                             )
@@ -67,16 +95,20 @@ struct ContentView: View {
                             ScrollView(.horizontal) {
                                 HStack(
                                     alignment: .top,
-                                    spacing: 16
+                                    spacing: MovieCardMetrics.columnSpacing
                                 ) {
                                     ForEach(
-                                        service.favoriteMovies,
+                                        movieViewModel.favoriteMovies.prefix(20),
                                         id: \.id
-                                    ) { movie in
-                                        MovieCardView(
-                                            movie: movie
+                                    ) { favorite in
+                                        MovieFavoriteCardView(
+                                            favorite: favorite
                                         )
-                                        .frame(width: 180)
+                                        .containerRelativeFrame(
+                                            .horizontal,
+                                            count: 2,
+                                            spacing: MovieCardMetrics.columnSpacing
+                                        )
                                     }
                                 }
                             }
@@ -85,38 +117,60 @@ struct ContentView: View {
                     .padding()
                 }
             }
-            .navigationDestination(for: Destination.self) { destination in
+            .navigationDestination(
+                for: Destination.self
+            ) { destination in
                 switch destination {
-                case .latest:
-                    SecondView(
+                case .latest, .favorites, .results:
+                    MovieListView(
                         destination: destination,
-                        path: $path
-                    )
-
-                case .favorites:
-                    SecondView(
-                        destination: destination,
-                        path: $path
-                    )
-
-                case .results:
-                    SecondView(
-                        destination: destination,
+                        movieViewModel: movieViewModel,
                         path: $path
                     )
 
                 case .detail(let movie):
                     MovieDetailView(
-                        movie: movie,
+                        movieID: movie.id,
+                        title: movie.title,
+                        year: movie.year,
+                        posterPath: movie.posterPath,
+                        path: $path
+                    )
+
+                case .favoriteDetail(let favorite):
+                    MovieDetailView(
+                        movieID: favorite.id,
+                        title: favorite.title,
+                        year: favorite.year,
+                        posterPath: favorite.posterPath,
                         path: $path
                     )
                 }
             }
         }
-        .environment(service)
+        .environment(movieViewModel)
+        .task {
+            await movieViewModel.loadLatestMovies()
+        }
     }
 }
 
 #Preview {
-    ContentView()
+    let schema = Schema([
+        SavedMovie.self
+    ])
+
+    let configuration = ModelConfiguration(
+        schema: schema,
+        isStoredInMemoryOnly: true
+    )
+
+    let container = try! ModelContainer(
+        for: schema,
+        configurations: [configuration]
+    )
+
+    let context = ModelContext(container)
+
+    ContentView(context: context)
 }
