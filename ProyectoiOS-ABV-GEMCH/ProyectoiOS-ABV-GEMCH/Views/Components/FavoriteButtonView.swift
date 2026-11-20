@@ -11,23 +11,57 @@ struct FavoriteButtonView: View {
 
     let movie: Movie
 
+    var isLarge = false
+
     var body: some View {
         Button {
             movieViewModel.toggleFavorite(movie)
         } label: {
-            Image(
-                systemName: movieViewModel.isFavorite(movie)
-                    ? "heart.fill"
-                    : "heart"
+            FavoriteIconView(
+                isFavorite: movieViewModel.isFavorite(movie),
+                isLarge: isLarge
             )
-            .font(.title2)
-            .foregroundStyle(.red)
-            .padding(8)
         }
+        .buttonStyle(.plain)
         .accessibilityLabel(
             movieViewModel.isFavorite(movie)
                 ? "Quitar \(movie.title) de favoritos"
                 : "Agregar \(movie.title) a favoritos"
         )
+    }
+}
+
+struct FavoriteIconView: View {
+    let isFavorite: Bool
+
+    var isLarge = false
+
+    var body: some View {
+        Image(
+            systemName: isFavorite
+                ? "heart.fill"
+                : "heart"
+        )
+        .font(
+            .system(
+                size: isLarge ? 27 : 22
+            )
+        )
+        .foregroundStyle(
+            isFavorite
+                ? MovieMapStyle.accent
+                : .white
+        )
+        .frame(
+            width: isLarge ? 48 : 44,
+            height: isLarge ? 48 : 44
+        )
+        .background(
+            isLarge
+                ? MovieMapStyle.surface
+                : MovieMapStyle.background
+        )
+        .cornerRadius(12)
+        .accessibilityHidden(true)
     }
 }

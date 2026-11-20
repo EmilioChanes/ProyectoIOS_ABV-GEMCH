@@ -13,13 +13,24 @@ struct MoviePosterView: View {
     let posterPath: String?
 
     var body: some View {
-        Color.gray.opacity(0.15)
-            .aspectRatio(2.0 / 3.0, contentMode: .fit)
+        MovieMapStyle.surface
+            .aspectRatio(
+                2.0 / 3.0,
+                contentMode: .fit
+            )
             .overlay {
-                MoviePosterContent(movieID: movieID, posterPath: posterPath)
-                    .id(PosterKey(movieID: movieID, path: posterPath))
+                MoviePosterContent(
+                    movieID: movieID,
+                    posterPath: posterPath
+                )
+                .id(
+                    PosterKey(
+                        movieID: movieID,
+                        path: posterPath
+                    )
+                )
             }
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipped()
     }
 
     private struct PosterKey: Hashable {
@@ -30,6 +41,7 @@ struct MoviePosterView: View {
 
 private struct MoviePosterContent: View {
     @Environment(MovieViewModel.self) private var movieViewModel
+
     @State private var alternativePath: String?
     @State private var didFinishLookup = false
 
@@ -37,18 +49,22 @@ private struct MoviePosterContent: View {
     let posterPath: String?
 
     var body: some View {
-        if let url = imageURL(for: alternativePath ?? posterPath) {
+        if let url = imageURL(
+            for: alternativePath ?? posterPath
+        ) {
             AsyncImage(url: url) { phase in
                 switch phase {
                 case .empty:
                     loadingPoster
 
                 case .success(let image):
-                    image.resizable()
-                        .scaledToFit()
+                    image
+                        .resizable()
+                        .scaledToFill()
                         .accessibilityHidden(true)
                         .task(id: alternativePath) {
-                            if let alternativePath, !Task.isCancelled {
+                            if let alternativePath,
+                               !Task.isCancelled {
                                 movieViewModel.saveRecoveredPoster(
                                     movieID: movieID,
                                     posterPath: alternativePath
@@ -57,10 +73,18 @@ private struct MoviePosterContent: View {
                         }
 
                 case .failure(let error):
-                    posterStatus.task(id: url) {
-                        print("Portada | ID \(movieID) | Falló la descarga:", url, error)
-                        await findAlternative(excluding: posterPath)
-                    }
+                    posterStatus
+                        .task(id: url) {
+                            print(
+                                "Portada | ID \(movieID) | Falló la descarga:",
+                                url,
+                                error
+                            )
+
+                            await findAlternative(
+                                excluding: posterPath
+                            )
+                        }
 
                 @unknown default:
                     unavailablePoster
@@ -68,25 +92,42 @@ private struct MoviePosterContent: View {
             }
             .id(url)
         } else {
-            posterStatus.task {
-                guard !didFinishLookup else { return }
+            posterStatus
+                .task {
+                    guard !didFinishLookup else {
+                        return
+                    }
 
-                print("Portada | ID \(movieID) | Sin ruta de portada válida")
-                await findAlternative(excluding: nil)
-            }
+                    print(
+                        "Portada | ID \(movieID) | Sin ruta de portada válida"
+                    )
+
+                    await findAlternative(
+                        excluding: nil
+                    )
+                }
         }
     }
 
-    private func imageURL(for path: String?) -> URL? {
-        guard let path, path.hasPrefix("/"), path.count > 1 else {
+    private func imageURL(
+        for path: String?
+    ) -> URL? {
+        guard let path,
+              path.hasPrefix("/"),
+              path.count > 1 else {
             return nil
         }
 
-        return URL(string: "https://image.tmdb.org/t/p/w500\(path)")
+        return URL(
+            string: "https://image.tmdb.org/t/p/w500\(path)"
+        )
     }
 
-    private func findAlternative(excluding path: String?) async {
-        guard !didFinishLookup, !Task.isCancelled else {
+    private func findAlternative(
+        excluding path: String?
+    ) async {
+        guard !didFinishLookup,
+              !Task.isCancelled else {
             return
         }
 
@@ -114,6 +155,7 @@ private struct MoviePosterContent: View {
 
     private var loadingPoster: some View {
         ProgressView()
+            .tint(.white)
             .accessibilityLabel("Cargando portada")
     }
 
@@ -127,7 +169,9 @@ private struct MoviePosterContent: View {
                 .font(.caption)
                 .multilineTextAlignment(.center)
         }
-        .foregroundStyle(.secondary)
+        .foregroundStyle(
+            MovieMapStyle.secondaryText
+        )
         .padding(8)
     }
 }

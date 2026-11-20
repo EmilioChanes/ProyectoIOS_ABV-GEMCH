@@ -25,13 +25,17 @@ struct MovieFavoriteCardView: View {
 
     private var removeButton: some View {
         Button {
-            movieViewModel.removeFavorite(id: favorite.id)
+            movieViewModel.removeFavorite(
+                id: favorite.id
+            )
         } label: {
-            Image(systemName: "heart.fill")
-                .font(.title2)
-                .foregroundStyle(.red)
-                .padding(8)
+            FavoriteIconView(
+                isFavorite: true
+            )
         }
-        .accessibilityLabel("Quitar \(favorite.title) de favoritos")
+        .buttonStyle(.plain)
+        .accessibilityLabel(
+            "Quitar \(favorite.title) de favoritos"
+        )
     }
 }

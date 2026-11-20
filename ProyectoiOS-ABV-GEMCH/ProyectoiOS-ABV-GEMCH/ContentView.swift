@@ -9,114 +9,75 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @Environment(\.verticalSizeClass)
+    private var verticalSizeClass
+
+    @Environment(\.dynamicTypeSize)
+    private var dynamicTypeSize
+
     @State private var movieViewModel: MovieViewModel
     @State private var path: [Destination] = []
+    @State private var searchText = ""
 
     init(context: ModelContext) {
-        let service = MovieService(context: context)
+        let service = MovieService(
+            context: context
+        )
 
         _movieViewModel = State(
-            initialValue: MovieViewModel(service: service)
+            initialValue: MovieViewModel(
+                service: service
+            )
+        )
+    }
+
+    private var isCompactHeight: Bool {
+        verticalSizeClass == .compact
+    }
+
+    private var sidePadding: CGFloat {
+        isCompactHeight ? 16 : 24
+    }
+
+    private var cardWidth: CGFloat {
+        MovieCardMetrics.carouselWidth(
+            isCompactHeight: isCompactHeight,
+            isAccessibilitySize: dynamicTypeSize.isAccessibilitySize
         )
     }
 
     var body: some View {
         NavigationStack(path: $path) {
-            ScrollView {
-                VStack(spacing: 20) {
+            ScrollView(.vertical) {
+                VStack(
+                    spacing: isCompactHeight ? 16 : 24
+                ) {
                     HeaderView(
                         path: $path,
+                        searchText: $searchText,
                         showHomeButton: false
                     )
 
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Text("Últimas películas")
-                                .font(.title2)
-                                .bold()
+                    latestSection
 
-                            Spacer()
-
-                            NavigationLink(
-                                "Ver más",
-                                value: Destination.latest
-                            )
-                        }
-
-                        if movieViewModel.isLoadingMovies {
-                            ProgressView("Cargando películas...")
-                        } else if let errorMessage =
-                            movieViewModel.moviesErrorMessage {
-                            Text(errorMessage)
-                                .foregroundStyle(.red)
-                        } else if movieViewModel.movies.isEmpty {
-                            Text("No hay películas disponibles.")
-                                .foregroundStyle(.secondary)
-                        } else {
-                            ScrollView(.horizontal) {
-                                HStack(
-                                    alignment: .top,
-                                    spacing: MovieCardMetrics.columnSpacing
-                                ) {
-                                    ForEach(
-                                        movieViewModel.movies.prefix(20),
-                                        id: \.id
-                                    ) { movie in
-                                        MovieCardView(movie: movie)
-                                            .containerRelativeFrame(
-                                                .horizontal,
-                                                count: 2,
-                                                spacing: MovieCardMetrics.columnSpacing
-                                            )
-                                    }
-                                }
-                            }
-                        }
-
-                        HStack {
-                            Text("Películas favoritas")
-                                .font(.title2)
-                                .bold()
-
-                            Spacer()
-
-                            NavigationLink(
-                                "Ver más",
-                                value: Destination.favorites
-                            )
-                        }
-
-                        if movieViewModel.favoriteMovies.isEmpty {
-                            Text(
-                                "Aún no tienes películas favoritas guardadas..."
-                            )
-                            .foregroundStyle(.secondary)
-                        } else {
-                            ScrollView(.horizontal) {
-                                HStack(
-                                    alignment: .top,
-                                    spacing: MovieCardMetrics.columnSpacing
-                                ) {
-                                    ForEach(
-                                        movieViewModel.favoriteMovies.prefix(20),
-                                        id: \.id
-                                    ) { favorite in
-                                        MovieFavoriteCardView(
-                                            favorite: favorite
-                                        )
-                                        .containerRelativeFrame(
-                                            .horizontal,
-                                            count: 2,
-                                            spacing: MovieCardMetrics.columnSpacing
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding()
+                    favoritesSection
                 }
+                .padding(.bottom, 24)
             }
+            .frame(
+                maxWidth: .infinity,
+                maxHeight: .infinity
+            )
+            .contentShape(Rectangle())
+            .clipped()
+            .background(
+                MovieMapStyle.background
+                    .ignoresSafeArea()
+            )
+            .toolbar(
+                .hidden,
+                for: .navigationBar
+            )
             .navigationDestination(
                 for: Destination.self
             ) { destination in
@@ -149,8 +110,192 @@ struct ContentView: View {
             }
         }
         .environment(movieViewModel)
+        .preferredColorScheme(.dark)
+        .tint(.white)
         .task {
             await movieViewModel.loadLatestMovies()
+        }
+    }
+
+    private var latestSection: some View {
+        VStack(
+            alignment: .leading,
+            spacing: isCompactHeight ? 12 : 20
+        ) {
+            sectionHeader(
+                "Últimas películas",
+                destination: .latest
+            )
+            .padding(
+                .horizontal,
+                sidePadding
+            )
+
+            if movieViewModel.isLoadingMovies {
+                ProgressView(
+                    "Cargando películas..."
+                )
+                .frame(maxWidth: .infinity)
+            } else if let message = movieViewModel.moviesErrorMessage {
+                Text(message)
+                    .foregroundStyle(.pink)
+                    .padding(
+                        .horizontal,
+                        sidePadding
+                    )
+            } else if movieViewModel.movies.isEmpty {
+                Text(
+                    "No hay películas recientes que cumplan los filtros en esta página."
+                )
+                .padding(
+                    .horizontal,
+                    sidePadding
+                )
+            } else {
+                MovieCarousel {
+                    ForEach(
+                        movieViewModel.movies.prefix(20),
+                        id: \.id
+                    ) { movie in
+                        MovieCardView(
+                            movie: movie
+                        )
+                        .frame(
+                            width: cardWidth
+                        )
+                    }
+                }
+            }
+        }
+        .padding(
+            .vertical,
+            isCompactHeight ? 16 : 24
+        )
+        .frame(
+            maxWidth: .infinity,
+            alignment: .leading
+        )
+        .foregroundStyle(.white)
+        .border(
+            MovieMapStyle.divider,
+            width: 1
+        )
+    }
+
+    private var favoritesSection: some View {
+        VStack(
+            alignment: .leading,
+            spacing: isCompactHeight ? 12 : 20
+        ) {
+            sectionHeader(
+                "Películas favoritas",
+                destination: .favorites,
+                showsHeart: true
+            )
+            .padding(
+                .horizontal,
+                sidePadding
+            )
+
+            if movieViewModel.favoriteMovies.isEmpty {
+                Text(
+                    "Aún no tienes películas favoritas guardadas..."
+                )
+                .font(
+                    .system(
+                        .title3,
+                        design: .monospaced,
+                        weight: .bold
+                    )
+                )
+                .multilineTextAlignment(.center)
+                .frame(
+                    maxWidth: .infinity,
+                    minHeight: isCompactHeight ? 120 : 220
+                )
+                .padding(
+                    .horizontal,
+                    sidePadding
+                )
+            } else {
+                MovieCarousel {
+                    ForEach(
+                        movieViewModel.favoriteMovies.prefix(20),
+                        id: \.id
+                    ) { favorite in
+                        MovieFavoriteCardView(
+                            favorite: favorite
+                        )
+                        .frame(
+                            width: cardWidth
+                        )
+                    }
+                }
+            }
+        }
+        .padding(
+            .vertical,
+            isCompactHeight ? 16 : 24
+        )
+        .frame(
+            maxWidth: .infinity,
+            alignment: .leading
+        )
+        .foregroundStyle(.white)
+        .border(
+            MovieMapStyle.divider,
+            width: 1
+        )
+    }
+
+    private func sectionHeader(
+        _ title: String,
+        destination: Destination,
+        showsHeart: Bool = false
+    ) -> some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(
+                    .system(
+                        isCompactHeight ? .title3 : .title2,
+                        design: .monospaced,
+                        weight: .black
+                    )
+                )
+                .layoutPriority(1)
+
+            if showsHeart {
+                Image(
+                    systemName: "heart.fill"
+                )
+                .foregroundStyle(
+                    MovieMapStyle.accent
+                )
+                .accessibilityHidden(true)
+            }
+
+            Spacer(minLength: 0)
+
+            NavigationLink(value: destination) {
+                Text("Ver más")
+                    .font(
+                        .system(
+                            .caption,
+                            design: .monospaced,
+                            weight: .bold
+                        )
+                    )
+                    .padding(.horizontal, 8)
+                    .frame(minHeight: 44)
+                    .background(
+                        MovieMapStyle.button
+                    )
+                    .cornerRadius(8)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(
+                "Ver más: \(title)"
+            )
         }
     }
 }
@@ -170,7 +315,7 @@ struct ContentView: View {
         configurations: [configuration]
     )
 
-    let context = ModelContext(container)
-
-    ContentView(context: context)
+    ContentView(
+        context: ModelContext(container)
+    )
 }

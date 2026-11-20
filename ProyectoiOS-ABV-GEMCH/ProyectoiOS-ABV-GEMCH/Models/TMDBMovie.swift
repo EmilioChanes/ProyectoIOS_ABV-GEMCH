@@ -13,9 +13,15 @@ struct TMDBMovie: Decodable {
     let posterPath: String?
     let voteAverage: Double?
     let genres: [TMDBGenre]?
+    let runtime: Int?
 
     enum CodingKeys: String, CodingKey {
-        case id, title, overview, genres
+        case id
+        case title
+        case overview
+        case genres
+        case runtime
+
         case releaseDate = "release_date"
         case posterPath = "poster_path"
         case voteAverage = "vote_average"
@@ -26,13 +32,18 @@ struct TMDBMovie: Decodable {
         directors: [String] = [],
         cast: [String] = []
     ) -> Movie {
-        let categories = (genres ?? []).map { $0.name }
+        let categories = (genres ?? []).map {
+            $0.name
+        }
+
         let synopsis = overview ?? ""
 
         return Movie(
             id: id,
             title: title,
-            year: String((releaseDate ?? "").prefix(4)),
+            year: String(
+                (releaseDate ?? "").prefix(4)
+            ),
             classification: classification,
             category: categories.isEmpty
                 ? "No disponible"
@@ -40,10 +51,14 @@ struct TMDBMovie: Decodable {
             director: directors.isEmpty
                 ? "No disponible"
                 : directors.joined(separator: ", "),
-            synopsis: synopsis.isEmpty ? "Sinopsis no disponible." : synopsis,
+            synopsis: synopsis.isEmpty
+                ? "Sinopsis no disponible."
+                : synopsis,
             cast: cast,
             rating: voteAverage,
-            posterPath: posterPath
+            posterPath: posterPath,
+            releaseDate: releaseDate,
+            runtime: runtime
         )
     }
 }
@@ -58,10 +73,13 @@ struct TMDBMovieResponse: Decodable {
     let totalPages: Int
 
     enum CodingKeys: String, CodingKey {
-        case page, results
+        case page
+        case results
+
         case totalPages = "total_pages"
     }
 }
+
 struct TMDBCreditsResponse: Decodable {
     let cast: [TMDBCastMember]
     let crew: [TMDBCrewMember]
